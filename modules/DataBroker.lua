@@ -75,5 +75,7 @@ function module:GetOptions()
 end
 
 function module:OnInitialize()
+    if module.__registered then return end
+    module.__registered = true
     LDBIcon:Register(ADDON_NAME, AL_LDB, AutoLooter.db.profile.minimap)
 end

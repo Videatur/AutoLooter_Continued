@@ -29,7 +29,7 @@ function module:InitializeDb()
 end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
-    local id = Util.getId(link)
+    local id = Util.GetCachedId(link)
     if AutoLooter.db.profile.items[id] or AutoLooter.db.profile.items[sTitle] then
         return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil
     end

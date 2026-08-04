@@ -20,8 +20,9 @@ module.priority = 100000
 local reason = Color.GREEN .. L["All"]
 local reasonLog = Color.ORANGE .. L["Ignored"]
 
-local GetItemInfoInstant = (C_Item and C_Item.GetItemInfoInstant) or GetItemInfoInstant
 local CloseLoot = CloseLoot
+local InCombatLockdown = InCombatLockdown
+local CreateFrame = CreateFrame
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
     if AutoLooter.db.profile.lootAll then
@@ -29,16 +30,31 @@ function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, lock
         return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil
     else
         -- Logs everything left
-        local _, itemType, itemSubType = GetItemInfoInstant(link)
+        local _, itemType, itemSubType = Util.GetCachedItemInfoInstant(link)
         local typeSubtype = (AutoLooter.db.profile.printoutType and Color.YELLOW .. "(" .. itemType .. "/" .. itemSubType .. ")|r") or ""
 
         return false, reasonLog, typeSubtype .. AutoLooter.FormatLoot(icon, link, nQuantity), true
     end
 end
 
+-- CloseLoot is a protected call and is silently blocked (or spams
+-- ADDON_ACTION_BLOCKED) while in combat. Defer the close until combat ends.
+local function SafeCloseLoot()
+    if InCombatLockdown() then
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("PLAYER_REGEN_ENABLED")
+        f:SetScript("OnEvent", function(self)
+            self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+            CloseLoot()
+        end)
+    else
+        CloseLoot()
+    end
+end
+
 function module.Finish()
     if AutoLooter.db.profile.close then
-        CloseLoot()
+        SafeCloseLoot()
     end
 end
 

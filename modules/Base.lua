@@ -48,7 +48,10 @@ function module:GetOptions()
                 lootEarly = {
                     type = "toggle",
                     name = L["Fast loot"],
-                    set = function(info, val) AutoLooter.db.profile.lootEarly = Util.GetBoolean(val) end,
+                    set = function(info, val)
+                        AutoLooter.db.profile.lootEarly = Util.GetBoolean(val)
+                        AutoLooter:RegisterLootEvents()
+                    end,
                     get = function(info) return AutoLooter.db.profile.lootEarly end,
                 },
                 auctionatorIntegration = {

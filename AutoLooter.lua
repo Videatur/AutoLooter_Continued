@@ -11,9 +11,10 @@ local type = type
 local pairs = pairs
 local ipairs = ipairs
 local tostring = tostring
-local tonumber = tonumber
 local select = select
 local table_insert = table.insert
+local table_concat = table.concat
+local pcall = pcall
 
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 local MOD_VERSION = GetAddOnMetadata(ADDON_NAME, "Version")
@@ -50,7 +51,7 @@ local function findChatFrame(name)
     for i = 1, NUM_CHAT_WINDOWS do
         local chatName = GetChatWindowInfo(i)
         if chatName then
-            local chatFrame = getglobal("ChatFrame" .. i)
+            local chatFrame = _G["ChatFrame" .. i]
             chatCache[chatName] = chatFrame
 
             if chatName == name then
@@ -79,10 +80,11 @@ function AutoLooter.print(...)
     local chatFrames = filterChatFrame(AutoLooter.db.char.chatFrameNames)
     if #chatFrames == 0 then return end
 
-    local out = ""
+    local args = {}
     for i = 1, select("#", ...) do
-        out = out .. tostring(select(i, ...))
+        args[i] = tostring(select(i, ...))
     end
+    local out = table_concat(args)
 
     for i, chatFrame in ipairs(chatFrames) do
         chatFrame:AddMessage(Color.WHITE .. "[" .. Color.BLUE .. "AL" .. Color.WHITE .. "]|r|r|r " .. out)
@@ -168,8 +170,7 @@ end
 
 function AutoLooter:OnInitialize()
     -- On some Classic branches LE_EXPANSION_LEVEL_CURRENT can be nil; guard it.
-    local currentExpansion = _G.LE_EXPANSION_LEVEL_CURRENT or (_G.GetExpansionLevel and _G.GetExpansionLevel()) or 0
-    local isDragonFlight = (tonumber(currentExpansion) or 0) >= 9 -- DRAGONFLIGHT = 9
+    local isDragonFlight = Util.IsDragonflight()
     local defaults = {
         profile = {
             items = {},
@@ -219,13 +220,24 @@ function AutoLooter:OnInitialize()
 end
 
 function AutoLooter:OnEnable()
-    AutoLooter:RegisterEvent("LOOT_READY")
-    AutoLooter:RegisterEvent("LOOT_OPENED")
+    self:RegisterLootEvents()
     events:Fire("OnEnable")
 end
 
 function AutoLooter:OnDisable()
     events:Fire("OnDisable")
+end
+
+-- Only the loot event actually used by the current lootEarly setting needs to
+-- be active; keeps the event handler from firing an empty pass on every loot.
+function AutoLooter:RegisterLootEvents()
+    if self.db.profile.lootEarly then
+        self:RegisterEvent("LOOT_READY")
+        self:UnregisterEvent("LOOT_OPENED")
+    else
+        self:RegisterEvent("LOOT_OPENED")
+        self:UnregisterEvent("LOOT_READY")
+    end
 end
 
 -- ============================================================================
@@ -234,7 +246,7 @@ end
 
 local function Loot(index, itemName, itemLink)
     AutoLooter.LootSlot(index)
-    AutoLooter.ConfirmLootSlot(index) -- In case it's a Bind on Pickup
+    pcall(AutoLooter.ConfirmLootSlot, index) -- In case it's a Bind on Pickup
     events:Fire("OnLoot", index)
 end
 
@@ -262,8 +274,19 @@ function AutoLooter:SortedModulesIterator(lootOnly)
         return modulesCache[cacheKey]
     end
 
+    -- Snapshot module priorities once per cache build so the sort comparator
+    -- never resolves GetModule() (O(n log n) lookups) during every comparison.
+    local priorities = {}
+    for key in self:IterateModules() do
+        local module = self:GetModule(key)
+        priorities[key] = (module and module.priority) or 99999999
+    end
+
     local function sort(o1, o2)
-        return (self:GetModule(o1).priority or 99999999) < (self:GetModule(o2).priority or 99999999)
+        local p1 = priorities[o1] or 99999999
+        local p2 = priorities[o2] or 99999999
+        if p1 == p2 then return o1 < o2 end -- stable tie-break for determinism
+        return p1 < p2
     end
     local exclusion = function(key, module)
         if module:IsEnabled() then
@@ -302,8 +325,12 @@ function AutoLooter:Loot(_, autoloot)
 
     events:Fire("OnLootReadyStart")
 
+    -- New loot window: drop item-info session cache from the previous loot.
+    Util.ResetLootCache()
+
     local reasonMap = {}
     local printReason = self.db.profile.printout
+    local lootModules = self:SortedModulesIterator(true)
 
     for nIndex = 1, self.GetNumLootItems() do
         local slotType = self.GetLootSlotType(nIndex) or 0
@@ -313,7 +340,10 @@ function AutoLooter:Loot(_, autoloot)
             quantity = quantity or 0
             local itemLink = self.GetLootSlotLink(nIndex)
 
-            for _, module in self:SortedModulesIterator(true) do
+            -- The iterator is a shared closure; reset it before each slot so
+            -- the module list is re-walked for every item.
+            lootModules(resetMessage)
+            for _, module in lootModules do
                 local loot, reason, reasonContent, forceBreak = module.CanLoot(
                     itemLink,
                     icon,

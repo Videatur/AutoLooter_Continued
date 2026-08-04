@@ -9,6 +9,7 @@ local ADDON_NAME, PRIVATE_TABLE = ...
 local string_gsub = string.gsub
 local string_gmatch = string.gmatch
 local table_insert = table.insert
+local unpack = unpack
 
 local L = LibStub("AceLocale-3.0"):GetLocale("AutoLooter")
 local Color = PRIVATE_TABLE.Color

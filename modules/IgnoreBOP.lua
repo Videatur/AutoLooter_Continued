@@ -18,8 +18,6 @@ module.priority = 600
 
 local reason = Color.ORANGE .. L["Ignored"]
 
-local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
-
 function module:CanEnable()
     return AutoLooter.db.profile.ignoreBop
 end
@@ -29,7 +27,7 @@ function module:InitializeDb()
 end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
-    if AutoLooter.db.profile.ignoreBop and link and select(14, GetItemInfo(link)) == 1 then
+    if AutoLooter.db.profile.ignoreBop and link and select(14, Util.GetCachedItemInfo(link)) == 1 then
         return false, reason, "(BoP)" .. AutoLooter.FormatLoot(icon, link, nQuantity), true
     end
 end

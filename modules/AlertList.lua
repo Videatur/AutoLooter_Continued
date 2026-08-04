@@ -31,7 +31,7 @@ function module:InitializeDb()
 end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
-    local id = Util.getId(link)
+    local id = Util.GetCachedId(link)
     local db = AutoLooter.db.profile
     if db.alert[id] or db.alert[sTitle] then
         if db.alertSound then

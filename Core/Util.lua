@@ -12,6 +12,13 @@ local tonumber = tonumber
 local string_match = string.match
 local string_gsub = string.gsub
 local select = select
+local table_insert = table.insert
+local table_sort = table.sort
+local unpack = unpack or table.unpack
+
+local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
+local GetItemInfoInstant = (C_Item and C_Item.GetItemInfoInstant) or GetItemInfoInstant
+local issecretvalue = _G.issecretvalue
 
 local L = LibStub("AceLocale-3.0"):GetLocale("AutoLooter")
 
@@ -65,10 +72,10 @@ function Util.orderedPairs(t, sortFunction, filter, resetMessage)
 
     for key, value in iNext, iTable do
         if not filter or filter(key, value) then
-            table.insert(sortTable, key)
+            table_insert(sortTable, key)
         end
     end
-    table.sort(sortTable, sortFunction)
+    table_sort(sortTable, sortFunction)
 
     local i = 0
     local iterator = function(k)
@@ -184,4 +191,97 @@ end
 
 function Util.trim(s)
     return (string_gsub(s, "^%s*(.-)%s*$", "%1"))
+end
+
+-- ============================================================================
+-- SHARED CACHING (hot loot path)
+-- ============================================================================
+
+local cachedIsDragonflight
+function Util.IsDragonflight()
+    if cachedIsDragonflight == nil then
+        local currentExpansion = _G.LE_EXPANSION_LEVEL_CURRENT or (_G.GetExpansionLevel and _G.GetExpansionLevel()) or 0
+        cachedIsDragonflight = (tonumber(currentExpansion) or 0) >= 9 -- DRAGONFLIGHT = 9
+    end
+    return cachedIsDragonflight
+end
+
+function Util.IsSecretValue(value)
+    return issecretvalue and issecretvalue(value) or false
+end
+
+-- Memoized item ID parsing. `Util.getId` runs regexes and C_Item calls; item
+-- links are stable strings, so a bounded cache avoids re-parsing the same link
+-- for every loot slot on every loot.
+local idCache = {}
+local idCacheCount = 0
+local MAX_ID_CACHE = 600
+
+function Util.GetCachedId(link)
+    if not link or link == "" then return nil end
+
+    local cached = idCache[link]
+    if cached ~= nil then return cached end
+
+    local id = Util.getId(link)
+    if id then
+        idCache[link] = id
+        idCacheCount = idCacheCount + 1
+        if idCacheCount > MAX_ID_CACHE then
+            idCache = {}
+            idCacheCount = 0
+        end
+    end
+    return id
+end
+
+-- Per-loot session cache for item info. Several modules (Price, Quest, Token,
+-- IgnoreBOP, Type, All, list modules) fetch the same item data for the same
+-- loot slot; this collapses those duplicate calls into one per item per loot.
+-- The cache is cleared at the start of every AutoLooter:Loot() so stale or
+-- partially-resolved async data never leaks across loot windows.
+local lootInfoCache = {}
+
+function Util.ResetLootCache()
+    lootInfoCache = {}
+end
+
+function Util.GetCachedItemInfo(link)
+    if not link or link == "" then return end
+
+    local id = Util.GetCachedId(link)
+    if not id then
+        return GetItemInfo(link)
+    end
+
+    local entry = lootInfoCache[id]
+    if entry and entry.info then
+        return unpack(entry.info)
+    end
+
+    local info = { GetItemInfo(link) }
+    entry = entry or {}
+    entry.info = info
+    lootInfoCache[id] = entry
+    return unpack(info)
+end
+
+function Util.GetCachedItemInfoInstant(link)
+    if not link or link == "" then return end
+
+    local id = Util.GetCachedId(link)
+    if not id then
+        return GetItemInfoInstant(link)
+    end
+
+    local entry = lootInfoCache[id]
+    if entry and entry.instant then
+        return unpack(entry.instant)
+    end
+
+    local instant = { GetItemInfoInstant(link) }
+    entry = entry or {}
+    entry.instant = instant
+    lootInfoCache[id] = entry
+    return unpack(instant)
 end

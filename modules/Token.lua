@@ -15,10 +15,8 @@ module.priority = 900
 
 local reason = Color.GREEN .. L["Token"]
 
-local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
-
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
-    local _, _, _, _, _, _, _, _, _, _, iPrice = GetItemInfo(link)
+    local _, _, _, _, _, _, _, _, _, _, iPrice = Util.GetCachedItemInfo(link)
 
     if not iPrice then
         return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil

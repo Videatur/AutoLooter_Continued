@@ -1,43 +1,60 @@
-## Interface: 120100, 120007, 50504, 38001, 20506, 11508, 11509
+## Interface: 120100, 120007, 50504, 38001, 20506, 11509
 ## Title: AutoLooter Continued
-## Version: v3.38
+## Version: v3.39
 ## Author: Videatur
 ## Notes: Auto Loot Money and Specific Items
+## Category: Loot
+## Category-deDE: Beute
+## Category-esES: Botín
+## Category-esMX: Botín
+## Category-frFR: Butin
+## Category-itIT: Bottino
+## Category-koKR: 전리품
+## Category-ptBR: Saque
+## Category-ruRU: Добыча
+## Category-zhCN: 战利品
+## Category-zhTW: 戰利品
 ## SavedVariables: AutoLooterDB
 ## IconTexture: Interface\Icons\Inv_misc_bag_01
 
+
+# Libs
 embeds.xml
-widget\WrapTextCheckBox.lua
+Widget\WrapTextCheckBox.lua
 
-Core.lua
+# Core
+Core\Core.lua
 
+#Localization
 Locales.lua
 
-Util.lua
-Auction.lua
+# Init
+Core\Util.lua
+Core\Auction.lua
 AutoLooter.lua
 
-modules\common\ListHelper.lua
-modules\common\ToggleableModulePrototype.lua
+# Modules
+Modules\common\ListHelper.lua
+Modules\common\ToggleableModulePrototype.lua
 
-modules\Debug.lua
-modules\AlertList.lua
-modules\All.lua
-modules\AutoConfirmLoot.lua
-modules\Base.lua
-modules\BlackList.lua
-modules\ChatLoot.lua
-modules\Currency.lua
-modules\DataBroker.lua
-modules\Fishing.lua
-modules\FishingIgnore.lua
-modules\IgnoreBOP.lua
-modules\Locked.lua
-modules\Money.lua
-modules\Price.lua
-modules\Quest.lua
-modules\Rarity.lua
-modules\Token.lua
-modules\Type.lua
-modules\WhiteList.lua
-modules\DragonflightOptions.lua
+Modules\Debug.lua
+Modules\AlertList.lua
+Modules\All.lua
+Modules\AutoConfirmLoot.lua
+Modules\Base.lua
+Modules\BlackList.lua
+Modules\ChatLoot.lua
+Modules\Currency.lua
+Modules\DataBroker.lua
+Modules\Fishing.lua
+Modules\FishingIgnore.lua
+Modules\IgnoreBOP.lua
+Modules\Locked.lua
+Modules\Money.lua
+Modules\Price.lua
+Modules\Quest.lua
+Modules\Rarity.lua
+Modules\Token.lua
+Modules\Type.lua
+Modules\WhiteList.lua
+Modules\DragonflightOptions.lua

@@ -21,7 +21,6 @@ module.priority = 1100
 
 local reason = Color.GREEN .. L["Type"]
 
-local GetItemInfoInstant = (C_Item and C_Item.GetItemInfoInstant) or GetItemInfoInstant
 local GetItemClassInfo = (C_Item and C_Item.GetItemClassInfo) or GetItemClassInfo
 local GetItemSubClassInfo = (C_Item and C_Item.GetItemSubClassInfo) or GetItemSubClassInfo
 
@@ -63,7 +62,7 @@ local function LootType(iType, iSubType, iRarity)
 end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
-    local _, itemType, itemSubType = GetItemInfoInstant(link)
+    local _, itemType, itemSubType = Util.GetCachedItemInfoInstant(link)
 
     if LootType(itemType, itemSubType, nRarity) then
         local typeSubtype = (AutoLooter.db.profile.printoutType and Color.YELLOW .. "(" .. itemType .. "/" .. itemSubType .. ")|r") or ""
@@ -100,7 +99,11 @@ local function GetOrCreateTypeTableDb(db, type, subtype)
     return db.typeTable[type][subtype]
 end
 
-local function CreateAHTable(defTable)
+local typeSchema
+
+-- The class/subclass names are static; build the structure once and cache it so
+-- opening the options panel never re-scans every AH class/subclass.
+local function BuildTypeSchema()
     local out = {}
 
     local itemClasses = (Enum and Enum.ItemClass) or {
@@ -124,10 +127,10 @@ local function CreateAHTable(defTable)
     }
 
     for _, itemClass in pairs(itemClasses) do
-        local t = {}
         local classInfo = GetItemClassInfo(itemClass)
 
         if classInfo then
+            local t = {}
             local itemSubClasses = C_AuctionHouse.GetAuctionItemSubClasses(itemClass)
             if #itemSubClasses > 0 then
                 for _, itemSubClass in pairs(itemSubClasses) do
@@ -135,15 +138,36 @@ local function CreateAHTable(defTable)
                     -- GetAuctionItemSubClasses for the itemClass '0', is returning a subclass '-1' for some reason.
                     -- So we have to check if it's a real subclass here
                     if subclassInfo then
-                        t[subclassInfo] = GetOrCreateTypeTableDb(defTable, classInfo, subclassInfo)
+                        t[subclassInfo] = true
                     end
                 end
             else
-                t[classInfo] = GetOrCreateTypeTableDb(defTable, classInfo, classInfo)
+                t[classInfo] = true
             end
 
             out[classInfo] = t
         end
+    end
+
+    return out
+end
+
+local function GetTypeSchema()
+    if not typeSchema then
+        typeSchema = BuildTypeSchema()
+    end
+    return typeSchema
+end
+
+local function CreateAHTable(defTable)
+    local out = {}
+
+    for classInfo, subclasses in pairs(GetTypeSchema()) do
+        local t = {}
+        for subclassInfo in pairs(subclasses) do
+            t[subclassInfo] = GetOrCreateTypeTableDb(defTable, classInfo, subclassInfo)
+        end
+        out[classInfo] = t
     end
 
     return out

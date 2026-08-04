@@ -19,10 +19,10 @@ module.priority = 800
 
 local reason = Color.GREEN .. L["Quest"]
 
-local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
 local GetNumQuestLogEntries = (C_QuestLog and C_QuestLog.GetNumQuestLogEntries) or GetNumQuestLogEntries
 local GetNumQuestLeaderBoards = (C_QuestLog and C_QuestLog.GetNumQuestLeaderBoards) or GetNumQuestLeaderBoards
 local GetQuestLogLeaderBoard = (C_QuestLog and C_QuestLog.GetQuestLogLeaderBoard) or GetQuestLogLeaderBoard
+local C_Timer = C_Timer
 
 local questItemList = {}
 local questItemClassID = LE_ITEM_CLASS_QUESTITEM or Enum.ItemClass.Questitem
@@ -44,7 +44,7 @@ end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
     if AutoLooter.db.profile.lootQuest then
-        local itemName, _, _, _, _, itemType, itemSubType, _, _, _, iPrice, itemClassID, itemSubClassID, bindType = GetItemInfo(link)
+        local itemName, _, _, _, _, itemType, itemSubType, _, _, _, iPrice, itemClassID, itemSubClassID, bindType = Util.GetCachedItemInfo(link)
         if itemName and (isQuestItem or bindType == 4 or itemClassID == questItemClassID or questItemList[itemName]) then
             return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil
         end
@@ -94,14 +94,31 @@ function module:CreateQuestItemList()
     return itemList
 end
 
+-- UNIT_QUEST_LOG_CHANGED fires frequently (per loot, per progress tick);
+-- debounce full quest-log rescans so we don't re-scan every quest each time.
+local rescanTimer
+
+local function ScheduleRescan()
+    if rescanTimer then
+        if rescanTimer.Cancel then rescanTimer:Cancel() end
+        rescanTimer = nil
+    end
+    rescanTimer = C_Timer.After(0.5, function()
+        rescanTimer = nil
+        if module:IsEnabled() then
+            questItemList = module:CreateQuestItemList()
+        end
+    end)
+end
+
 function module:QUEST_LOG_UPDATE()
     self:UnregisterEvent("QUEST_LOG_UPDATE")
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-    questItemList = self:CreateQuestItemList()
+    ScheduleRescan()
 end
 
 function module:UNIT_QUEST_LOG_CHANGED(event, unitId)
     if unitId == "player" then
-        questItemList = self:CreateQuestItemList()
+        ScheduleRescan()
     end
 end

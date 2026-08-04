@@ -10,14 +10,12 @@ local _, PRIVATE_TABLE = ...
 local type = type
 
 -- Safely detect Dragonflight to avoid errors on Classic/MoP where the constant may be nil
-local currentExpansion = _G.LE_EXPANSION_LEVEL_CURRENT or (_G.GetExpansionLevel and _G.GetExpansionLevel()) or 0
-local isDragonFlight = (tonumber(currentExpansion) or 0) >= 9 -- DRAGONFLIGHT = 9
-if not isDragonFlight then
+local Util = PRIVATE_TABLE.Util
+if not Util.IsDragonflight() then
     return
 end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("AutoLooter")
-local Util = PRIVATE_TABLE.Util
 local AutoLooter = LibStub("AceAddon-3.0"):GetAddon("AutoLooter")
 local module = AutoLooter:NewModule("DragonflightOptions")
 
@@ -28,7 +26,10 @@ function module:OnInitialize()
         },
     }
     self.db = AutoLooter.db:RegisterNamespace("DragonflightOptions", defaults)
-    LootFrame:HookScript("OnEvent", module.LOOT_SLOT_CLEARED)
+    if not module.__lootFrameHooked then
+        module.__lootFrameHooked = true
+        LootFrame:HookScript("OnEvent", module.LOOT_SLOT_CLEARED)
+    end
 end
 
 function module:LOOT_SLOT_CLEARED(event, index)
