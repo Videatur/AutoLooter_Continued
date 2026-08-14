@@ -1,6 +1,6 @@
-## Interface: 120100, 120007, 50504, 38001, 20506, 11509
+## Interface: 120100, 50504, 38002, 20506, 11509
 ## Title: AutoLooter Continued
-## Version: v3.39
+## Version: v3.40
 ## Author: Videatur
 ## Notes: Auto Loot Money and Specific Items
 ## Category: Loot
