@@ -38,15 +38,13 @@ function module:GetOptions()
             args = {
                 fishingLoot = {
                     type = "toggle",
+                    order = 1,
                     width = "double",
                     name = L["Loot everything while Fishing"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
-                    set = function(info, value) self:SetProfileVar("enableFishingLoot", Util.GetBoolean(value)) end,
-                    get = function(info) return self.db.profile.enableFishingLoot end,
-                    disabled = function()
-                        local fishingIgnore = AutoLooter:GetModule("FishingIgnore")
-                        return fishingIgnore and fishingIgnore.db.profile.enableModule
+                    set = function(info, value)
+                        AutoLooter:GetModule("FishingIgnore"):SetFishingMode("all", Util.GetBoolean(value))
                     end,
+                    get = function(info) return self.db.profile.enableFishingLoot end,
                 },
             },
         },

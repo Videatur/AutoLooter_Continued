@@ -1,6 +1,6 @@
-## Interface: 120100, 50504, 38002, 20506, 11509
+## Interface: 120105, 120100, 16001
 ## Title: AutoLooter Continued
-## Version: v3.40
+## Version: v4.07
 ## Author: Videatur
 ## Notes: Auto Loot Money and Specific Items
 ## Category: Loot
@@ -20,7 +20,6 @@
 
 # Libs
 embeds.xml
-Widget\WrapTextCheckBox.lua
 
 # Core
 Core\Core.lua
@@ -32,12 +31,12 @@ Locales.lua
 Core\Util.lua
 Core\Auction.lua
 AutoLooter.lua
+Widget\NativeOptions.lua
 
 # Modules
 Modules\common\ListHelper.lua
 Modules\common\ToggleableModulePrototype.lua
 
-Modules\Debug.lua
 Modules\AlertList.lua
 Modules\All.lua
 Modules\AutoConfirmLoot.lua

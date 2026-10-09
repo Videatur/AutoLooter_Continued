@@ -71,7 +71,7 @@ function module:GetOptions()
         general = {
             args = {
                 priceGroup = {
-                    name = L["Price (in coppers)"],
+                    name = L["Price"],
                     type = "group",
                     inline = true,
                     order = 1000,
@@ -91,9 +91,8 @@ function module:GetOptions()
                                 end
                             end,
                             min = 0,
-                            max = 10000000,
-                            softMax = 1000000,
-                            step = 1,
+                            max = 200000, -- 20 gold
+                            step = 1000, -- 10 silver per slider tick
                             width = "full",
                             set = function(info, value) module:SetProfileVar("price", value) end,
                             get = function(info) return AutoLooter.db.profile.price end,

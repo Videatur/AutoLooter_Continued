@@ -64,7 +64,15 @@ function module:GetOptions()
                     type = "select",
                     name = L["Remove item from white list"],
                     width = "full",
-                    values = function() return ListHelper.GetValues(AutoLooter.db.profile.items) end,
+                    values = function()
+                        local values = ListHelper.GetValues(AutoLooter.db.profile.items)
+                        local fishItems = AutoLooter.db.global.fishItems
+                        for key, link in pairs(values) do
+                            local id = Util.getId(key) or Util.getId(link)
+                            if id and fishItems[id] then values[key] = nil end
+                        end
+                        return values
+                    end,
                     set = function(info, val)
                         ListHelper.RemoveItem(val, AutoLooter.db.profile.items)
                         self:UpdateState()

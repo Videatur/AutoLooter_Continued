@@ -34,14 +34,12 @@ function module:GetOptions()
                     name = function() return (isWoWAutoLootEnabled() and Color.RED or "") .. L["Enable AutoLooter"] end,
                     desc = L["ENABLE_AUTO_LOOTER_DESC"],
                     order = 0,
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) LibStub("AceAddon-3.0"):GetAddon("AutoLooter").Toggle(val) end,
                     get = function(info) return AutoLooter.db.profile.enable end,
                 },
                 close = {
                     type = "toggle",
                     name = L["Close after loot"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) AutoLooter.db.profile.close = Util.GetBoolean(val) end,
                     get = function(info) return AutoLooter.db.profile.close end,
                 },
@@ -58,7 +56,6 @@ function module:GetOptions()
                     type = "toggle",
                     name = L["Auctionator"],
                     desc = L["Enable Auctionator integration for price checking"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     order = 10,
                     set = function(info, val) AutoLooter.db.profile.auctionatorIntegration = Util.GetBoolean(val) end,
                     get = function(info) return AutoLooter.db.profile.auctionatorIntegration end,
@@ -72,35 +69,24 @@ function module:GetOptions()
                 printout = {
                     type = "toggle",
                     name = L["Printout items looted"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) AutoLooter.db.profile.printout = Util.GetBoolean(val) end,
                     get = function(info) return AutoLooter.db.profile.printout end,
                 },
                 printLoginCommands = {
                     type = "toggle",
                     name = L["Printout commands at login"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) AutoLooter.db.profile.printCommandsAtLogin = Util.GetBoolean(val) end,
                     get = function(info) return AutoLooter.db.profile.printCommandsAtLogin end,
-                },
-                printoutIgnored = {
-                    type = "toggle",
-                    name = L["Printout items ignored"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
-                    set = function(info, val) AutoLooter.db.profile.printoutIgnored = Util.GetBoolean(val) end,
-                    get = function(info) return AutoLooter.db.profile.printoutIgnored end,
                 },
                 printoutIconOnly = {
                     type = "toggle",
                     name = L["Printout items icon only"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) AutoLooter.db.profile.printoutIconOnly = Util.GetBoolean(val) end,
                     get = function(info) return AutoLooter.db.profile.printoutIconOnly end,
                 },
                 printoutReason = {
                     type = "toggle",
                     name = L["Printout reason of loot"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) AutoLooter.db.profile.printoutReason = Util.GetBoolean(val) end,
                     get = function(info) return AutoLooter.db.profile.printoutReason end,
                 },
@@ -112,7 +98,7 @@ function module:GetOptions()
                         local values = {}
                         for i = 1, NUM_CHAT_WINDOWS do
                             local chatName = GetChatWindowInfo(i)
-                            if chatName and chatName ~= "" then
+                            if chatName and chatName ~= "" and chatName ~= COMBAT_LOG and chatName ~= VOICE_CHAT then
                                 values[chatName] = chatName
                             end
                         end

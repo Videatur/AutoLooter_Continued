@@ -39,7 +39,6 @@ function module:GetOptions()
                 ignoreBop = {
                     type = "toggle",
                     name = L["Ignore BoP"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, value) self:SetProfileVar("ignoreBop", Util.GetBoolean(value)) end,
                     get = function(info) return AutoLooter.db.profile.ignoreBop end,
                 },

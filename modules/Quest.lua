@@ -26,7 +26,6 @@ local C_Timer = C_Timer
 
 local questItemList = {}
 local questItemClassID = LE_ITEM_CLASS_QUESTITEM or Enum.ItemClass.Questitem
-local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 function module:CanEnable()
     return self.db.profile.lootQuest
@@ -38,14 +37,21 @@ end
 
 function module:OnEnable()
     self:RegisterEvent("QUEST_LOG_UPDATE")
+    self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
     -- If the option is enabled later, the event might not trigger immediately. So I update the list now.
     questItemList = self:CreateQuestItemList()
 end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
     if AutoLooter.db.profile.lootQuest then
+        -- Slot flags and objective names do not require cached item metadata.
+        if isQuestItem or (sTitle and questItemList[sTitle]) then
+            return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil
+        end
         local itemName, _, _, _, _, itemType, itemSubType, _, _, _, iPrice, itemClassID, itemSubClassID, bindType = Util.GetCachedItemInfo(link)
-        if itemName and (isQuestItem or bindType == 4 or itemClassID == questItemClassID or questItemList[itemName]) then
+        local instantClassID = select(6, Util.GetCachedItemInfoInstant(link))
+        if bindType == 4 or itemClassID == questItemClassID or instantClassID == questItemClassID
+            or (itemName and questItemList[itemName]) then
             return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil
         end
     end
@@ -58,7 +64,6 @@ function module:GetOptions()
                 lootQuest = {
                     type = "toggle",
                     name = L["Loot quest items"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, value) self:SetProfileVar("lootQuest", Util.GetBoolean(value)) end,
                     get = function(info) return self.db.profile.lootQuest end,
                 },
@@ -73,20 +78,25 @@ end
 
 function module:CreateQuestItemList()
     local itemList = {}
+    local function addObjective(text, objectiveType, finished)
+        if finished or objectiveType ~= "item" or type(text) ~= "string" then return end
+        -- Both formats occur across supported clients and locales.
+        local itemName = text:match("^(.-):%s*%d+%s*/%s*%d+%s*$")
+            or text:match("^%s*%d+%s*/%s*%d+%s+(.+)$")
+        if itemName then itemList[Util.trim(itemName)] = true end
+    end
 
     for questIndex = 1, GetNumQuestLogEntries() do
-        for boardIndex = 1, GetNumQuestLeaderBoards(questIndex) do
-            local leaderboardTxt, boardItemType, isDone = GetQuestLogLeaderBoard(boardIndex, questIndex)
-            if not isDone and boardItemType == "item" then
-                local itemName, numItems, numNeeded
-                if isRetail then
-                    numItems, numNeeded, itemName = leaderboardTxt:match("([%d]+)%s*/%s*([%d]+)%s*(.*)%s*")
-                else
-                    itemName, numItems, numNeeded = leaderboardTxt:match("(.*):%s*([%d]+)%s*/%s*([%d]+)")
+        if C_QuestLog and C_QuestLog.GetInfo and C_QuestLog.GetQuestObjectives then
+            local info = C_QuestLog.GetInfo(questIndex)
+            if info and not info.isHeader and info.questID then
+                for _, objective in ipairs(C_QuestLog.GetQuestObjectives(info.questID) or {}) do
+                    addObjective(objective.text, objective.type, objective.finished)
                 end
-                if itemName then
-                    itemList[itemName] = true
-                end
+            end
+        elseif GetNumQuestLeaderBoards and GetQuestLogLeaderBoard then
+            for boardIndex = 1, GetNumQuestLeaderBoards(questIndex) or 0 do
+                addObjective(GetQuestLogLeaderBoard(boardIndex, questIndex))
             end
         end
     end
@@ -100,10 +110,9 @@ local rescanTimer
 
 local function ScheduleRescan()
     if rescanTimer then
-        if rescanTimer.Cancel then rescanTimer:Cancel() end
-        rescanTimer = nil
+        rescanTimer:Cancel()
     end
-    rescanTimer = C_Timer.After(0.5, function()
+    rescanTimer = C_Timer.NewTimer(0.5, function()
         rescanTimer = nil
         if module:IsEnabled() then
             questItemList = module:CreateQuestItemList()
@@ -112,8 +121,6 @@ local function ScheduleRescan()
 end
 
 function module:QUEST_LOG_UPDATE()
-    self:UnregisterEvent("QUEST_LOG_UPDATE")
-    self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
     ScheduleRescan()
 end
 

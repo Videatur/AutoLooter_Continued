@@ -128,7 +128,7 @@ function AutoLooter:CreateProfile()
             config = {
                 type = "execute",
                 name = L["Show/Hide UI"],
-                func = function() LibStub("AceConfigDialog-3.0"):Open(ADDON_NAME) end,
+                func = function() AutoLooter:ToggleOptions() end,
                 hidden = true,
             },
             general = {
@@ -141,6 +141,7 @@ function AutoLooter:CreateProfile()
     }
 
     self.options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+    self.options.args.profile.name = L["Profiles"]
     self.options.args.profile.order = -1
 
     for _, module in AutoLooter:IterateModules() do
@@ -152,8 +153,17 @@ function AutoLooter:CreateProfile()
     local AceConfig = LibStub("AceConfig-3.0")
     AceConfig:RegisterOptionsTable("AutoLooter", self.options, { "al", "autolooter", "atl" })
 
-    local AceDialog = LibStub("AceConfigDialog-3.0")
-    self.optionsFrame = AceDialog:AddToBlizOptions("AutoLooter")
+    self:RegisterOptionsPanel()
+
+    -- Preserve AceConfig text commands, but open the native view for bare aliases.
+    for _, alias in ipairs({ "al", "autolooter", "atl" }) do
+        local command = "ACECONSOLE_" .. alias:upper()
+        local handler = SlashCmdList[command]
+        SlashCmdList[command] = function(input, editBox)
+            if not input or input:match("^%s*$") then self:ToggleOptions()
+            elseif handler then handler(input, editBox) end
+        end
+    end
 end
 
 local function registerResetCacheOn(module, func)
@@ -197,11 +207,16 @@ function AutoLooter:OnInitialize()
             printLoginCommands = false,
             printCommandsAtLogin = false,
         },
+        global = {
+            fishItems = {},
+            language = "client",
+        },
         char = {
             chatFrameNames = { [-1] = true },
         },
     }
     self.db = LibStub("AceDB-3.0"):New("AutoLooterDB", defaults, "Default")
+    PRIVATE_TABLE.Localization:Apply(self.db.global.language)
     self.db.RegisterCallback(self, "OnProfileChanged", "ReloadOptions")
     self.db.RegisterCallback(self, "OnProfileCopied", "ReloadOptions")
     self.db.RegisterCallback(self, "OnProfileReset", "ReloadOptions")

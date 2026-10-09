@@ -35,13 +35,7 @@ end
 
 function AL_LDB.OnClick(self, button)
     if button == "LeftButton" then
-        local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-        local frame = AceConfigDialog.OpenFrames[ADDON_NAME]
-        if frame and frame:IsShown() then
-            AceConfigDialog:Close(ADDON_NAME)
-        else
-            AceConfigDialog:Open(ADDON_NAME)
-        end
+        AutoLooter:ToggleOptions()
     elseif button == "RightButton" then
         AutoLooter.db.profile.lootAll = not AutoLooter.db.profile.lootAll
         AutoLooter.print(L["Loot everything"], ": ", Util.OnOff(AutoLooter.db.profile.lootAll))
@@ -65,7 +59,6 @@ function module:GetOptions()
                 showMinimap = {
                     type = "toggle",
                     name = L["Show/Hide minimap button"],
-                    dialogControl = "AutoLooter_WrapTextCheckBox",
                     set = function(info, val) module.SetMinimapVisibility(val) end,
                     get = function(info) return not AutoLooter.db.profile.minimap.hide end,
                 },

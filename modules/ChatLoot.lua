@@ -211,7 +211,6 @@ function module:GetOptions()
                         printItemsYouReceive = {
                             type = "toggle",
                             name = L["Print items you receive"],
-                            dialogControl = "AutoLooter_WrapTextCheckBox",
                             set = function(info, value)
                                 module:SetProfileVar("printItemsYouReceive", Util.GetBoolean(value))
                             end,
@@ -222,7 +221,6 @@ function module:GetOptions()
                         printItemsOthersReceive = {
                             type = "toggle",
                             name = L["Print items others receive"],
-                            dialogControl = "AutoLooter_WrapTextCheckBox",
                             set = function(info, value)
                                 module:SetProfileVar("printItemsOthersReceive", Util.GetBoolean(value))
                             end,

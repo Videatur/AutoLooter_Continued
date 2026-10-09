@@ -39,9 +39,22 @@ local function GetQualityHexColor(rarity)
             end
         end
     end
-    -- Legacy API: returns r,g,b,hex
-    local _, _, _, hex = _G.GetItemQualityColor(rarity)
-    return hex
+    -- Legacy API: returns r,g,b,hex.  It is not exposed by every Classic client.
+    local getItemQualityColor = _G.GetItemQualityColor
+    if getItemQualityColor then
+        local _, _, _, hex = getItemQualityColor(rarity)
+        return hex
+    end
+
+    -- Classic clients still provide the static color table when the function is absent.
+    local qualityColors = _G.ITEM_QUALITY_COLORS
+    local color = qualityColors and qualityColors[rarity]
+    if color and color.hex then
+        return color.hex
+    end
+
+    -- Keep callers (notably the options UI) functional on clients without any color API.
+    return nil
 end
 
 ---@class Color
@@ -113,7 +126,14 @@ end
 
 function Util.GetColorForRarity(rarity)
     local hex = GetQualityHexColor(rarity)
-    if hex then return "|c" .. hex end
+    if hex then
+        -- ITEM_QUALITY_COLORS.hex includes |c on some Classic clients, while
+        -- GetItemQualityColor returns only the eight hexadecimal characters.
+        if hex:sub(1, 2) == "|c" then
+            return hex
+        end
+        return "|c" .. hex
+    end
 
     return ""
 end

@@ -78,6 +78,10 @@ function ListHelper.AddItem(sTitle, list)
             end
 
             list[id] = link
+            for _, module in AutoLooter:IterateModules() do
+                if module.UpdateState and module.db then module:UpdateState() end
+            end
+            LibStub("AceConfigRegistry-3.0"):NotifyChange(ADDON_NAME)
             AutoLooter.print(L["Added"], ": ", Color.YELLOW, link)
         end)
     else

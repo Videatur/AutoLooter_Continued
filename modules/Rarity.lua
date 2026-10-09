@@ -21,9 +21,16 @@ module.priority = 700
 local reason = Color.GREEN .. L["Rarity"]
 
 local MAX_RARITY = 6
+local _, _, _, interfaceVersion = GetBuildInfo()
+local hideSpecialQualities = (tonumber(interfaceVersion) or 0) < 120100
+local specialQualities = { [6] = true, [7] = true, [8] = true } -- Artifact, Heirloom, WoW Token
+
+local function qualityAvailable(quality)
+    return not (hideSpecialQualities and specialQualities[quality])
+end
 
 local function qualityIterator()
-    if Enum.ItemQuality then
+    if Enum and Enum.ItemQuality then
         local qualityTable = Enum.ItemQuality
         local lastQuality, qualityNumber
         local function iterator()
@@ -42,20 +49,20 @@ end
 
 function module:CanEnable()
     for i in qualityIterator() do
-        if self.db.profile.rarity[i] then return true end
+        if qualityAvailable(i) and self.db.profile.rarity[i] then return true end
     end
 end
 
 function module:InitializeDb()
     local defaults = { profile = { rarity = {} } }
     for i in qualityIterator() do
-        defaults.profile.rarity[i] = (i >= 2)
+        defaults.profile.rarity[i] = (i >= 2) and qualityAvailable(i)
     end
     self.db = AutoLooter.db:RegisterNamespace("RarityModule", defaults)
 end
 
 function module.CanLoot(link, icon, sTitle, nQuantity, currencyID, nRarity, locked, isQuestItem, questId, isActive)
-    if nRarity and module.db.profile.rarity[nRarity] then
+    if nRarity and qualityAvailable(nRarity) and module.db.profile.rarity[nRarity] then
         return true, reason, AutoLooter.FormatLoot(icon, link, nQuantity), nil
     end
 end
@@ -71,7 +78,10 @@ function module:GetOptions()
                     values = function()
                         local values = {}
                         for i in qualityIterator() do
-                            values[i] = Util.GetColorForRarity(i) .. _G["ITEM_QUALITY" .. i .. "_DESC"]
+                            if qualityAvailable(i) then
+                                local name = _G["ITEM_QUALITY" .. i .. "_DESC"]
+                                if name then values[i] = Util.GetColorForRarity(i) .. name end
+                            end
                         end
                         return values
                     end,

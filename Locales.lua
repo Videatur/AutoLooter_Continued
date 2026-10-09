@@ -1,1258 +1,1687 @@
--- The content of this file is AUTO-GENERATED
--- You can update it at https://www.curseforge.com/wow/addons/autolooter/localization
+-- AutoLooter translations, maintained locally alongside the native UI.
+-- Keep localization keys and placeholders stable across all locales.
 
-local AceLocale = LibStub("AceLocale-3.0")
+local ADDON_NAME, PRIVATE_TABLE = ...
+local library = LibStub("AceLocale-3.0")
+local Localization = {
+    languages = {
+        enUS = "English", itIT = "Italiano", deDE = "Deutsch", frFR = "Français",
+        esES = "Español (España)", esMX = "Español (Latinoamérica)",
+        ptBR = "Português (Brasil)", ruRU = "Русский", koKR = "한국어",
+        zhCN = "简体中文", zhTW = "繁體中文",
+    },
+    order = { "client", "enUS", "itIT", "deDE", "frFR", "esES", "esMX", "ptBR", "ruRU", "koKR", "zhCN", "zhTW" },
+    translations = {},
+}
+PRIVATE_TABLE.Localization = Localization
+
+function Localization:IsSupportedPreference(value)
+    return value == "client" or self.languages[value] ~= nil
+end
+
+function Localization:Resolve(value)
+    local locale = self.languages[value] and value or GetLocale()
+    if locale == "enGB" then locale = "enUS" end
+    return self.languages[locale] and locale or "enUS"
+end
+
+-- SavedVariables are restored after the Lua files execute. Register all our
+-- translations now, then apply the saved preference after AceDB initializes.
+-- Keep the shared locale table intact so module-local references stay valid.
+function Localization:Apply(value)
+    local locale = self:Resolve(value)
+    local target = library:GetLocale(ADDON_NAME)
+    for key, text in pairs(self.translations.enUS) do target[key] = text end
+    if locale ~= "enUS" then
+        for key, text in pairs(self.translations[locale]) do target[key] = text end
+    end
+    self.active = locale
+end
+function Localization:RequiresReload(value)
+    return self:Resolve(value) ~= self.active
+end
+
+-- Only AutoLooter's table is changed; the shared library and GAME_LOCALE
+-- remain untouched, so other addons continue using their client locale.
+local AceLocale = {}
+function AceLocale:NewLocale(application, locale, isDefault, silent)
+    if isDefault then return library:NewLocale(application, locale, true, silent) end
+    if not Localization.translations.enUS then
+        local defaults = {}
+        for key, text in pairs(library:GetLocale(application)) do defaults[key] = text end
+        Localization.translations.enUS = defaults
+    end
+    local translations = {}
+    Localization.translations[locale] = translations
+    return translations
+end
 local L = AceLocale:NewLocale("AutoLooter", "enUS", true, true)
 if L then
-	L["(Legacy Types)"] = true
-	L["Add item to alert list"] = true
-	L["Add item to ignore list"] = true
-	L["Add item to white list"] = true
-	L["Added"] = true
-	L["Alert List"] = true
-	L["All"] = true
-	L["All items received between this delay will be grouped"] = true
-	L["Already in the list"] = true
-	L["Auctionator"] = true
-	L["Enable Auctionator integration for price checking"] = true
-	L["Auto confirm loot roll"] = true
-L["Blacklist"] = true
-L["Close"] = true
-L["Close after loot"] = true
-L["Coin"] = true
-L["Disabled"] = true
-L["Don't loot anything while Fishing"] = true
-L["Enable AutoLooter"] = true
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter will not loot anything when WoWs AutoLoot option is looting!
-
-This allows you to use the WoWs AutoLoot key as way to enable/disable AutoLooter by target.
-
-You can configure this options in 'Menu > Interface > Controls'.]=]
-L["Enabled"] = true
-L["Fast loot"] = true
-L["Fishing"] = true
-L["General"] = true
-L["Hold and drag to move"] = true
-L["Ignore BoP"] = true
-L["Ignore Fishing"] = true
-L["Ignore greys when looting by type"] = true
-L["Ignored"] = true
-L["Integration"] = true
-L["Invalid item"] = true
-L["Items list"] = true
-L["Left-click"] = true
-L["Listed"] = true
-L["Load Profile"] = true
-L["Load profile '${profile}' and reload UI?"] = true
-L["Locked"] = true
-L["Loot by Price"] = true
-L["Loot by Rarity"] = true
-L["Loot everything"] = true
-L["Loot everything while Fishing"] = true
-L["Loot everything with a price greater or equal to this value"] = true
-L["Loot quest items"] = true
-L["Not listed"] = true
-L["Off"] = true
-L["On"] = true
-L["Price"] = true
-L["Price (in coppers)"] = true
-L["Print items others receive"] = true
-L["Print items you receive"] = true
-L["Printout chat frames"] = true
-L["Printout commands at login"] = true
-L["Printout items icon only"] = true
-L["Printout items ignored"] = true
-L["Printout items looted"] = true
-L["Printout items type"] = true
-L["Printout reason of loot"] = true
-L["Quest"] = true
-L["Rarity"] = true
-L["Received Items"] = true
-L["Received items group Delay (ms)"] = true
-L["Remove all"] = true
-L["Remove item from alert list"] = true
-L["Remove item from ignore list"] = true
-L["Remove item from white list"] = true
-L["Remove old entries"] = true
-L["Removed"] = true
-L["Right-click"] = true
-L["Right-click to show profile menu"] = true
-L["Select all"] = true
-L["Set alert sound"] = true
-L["Show/Hide minimap button"] = true
-L["Show/Hide UI"] = true
-L["This can be useful to let addons like Fishing Buddy do its work"] = true
-L["This will cleanup and recreate the type database"] = true
-L["This will remove old types/subtypes entries from the database"] = true
-L["to Enable/Disable loot all"] = true
-L["to Show/Hide UI"] = true
-L["Token"] = true
-L["Try to show loot animation"] = true
-L["Type"] = true
-L["Whitelist"] = true
-L["You"] = true
-L["You can drag & drop items here!"] = true
-
-
-	if GetLocale() == "enUS" or GetLocale() == "enGB" then
-		return
-	end
+    L["(Legacy Types)"] = true
+    L["Add item to alert list"] = true
+    L["Add item to ignore list"] = true
+    L["Add item to white list"] = true
+    L["Added"] = true
+    L["Alert List"] = true
+    L["All"] = true
+    L["All items received between this delay will be grouped"] = true
+    L["Already in the list"] = true
+    L["Auctionator"] = true
+    L["Enable Auctionator integration for price checking"] = true
+    L["Auto confirm loot roll"] = true
+    L["Blacklist"] = true
+    L["Close"] = true
+    L["Close after loot"] = true
+    L["Coin"] = true
+    L["Disabled"] = true
+    L["Don't loot anything while Fishing"] = true
+    L["Loot only whitelisted items while Fishing"] = true
+    L["Fishing whitelist mode description"] = "While fishing, collect only items in the current profile's Whitelist, including items marked as fish. Ignore general rarity, price, type and loot-all rules for other items. An empty Whitelist collects nothing. Disable WoW Auto Loot and other automatic-loot addons; this mode cannot prevent them from collecting items."
+    L["Enable AutoLooter"] = true
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter does not collect items while WoW Auto Loot is collecting them.\n\nYou can use the WoW Auto Loot key to enable or disable AutoLooter for the current target.\n\nConfigure this in Menu > Interface > Controls."
+    L["Enabled"] = true
+    L["Fast loot"] = true
+    L["Fishing"] = true
+    L["Fishes (added in Whitelist)"] = "Fish (added in Whitelist)"
+    L["General"] = true
+    L["Profiles"] = true
+    L["Profile"] = true
+    L["Other options"] = true
+    L["Settings"] = true
+    L["Add"] = true
+    L["Create"] = true
+    L["Preview"] = true
+    L["Custom sound"] = true
+    L["Raid warning"] = true
+    L["Ready check"] = true
+    L["Boss warning"] = true
+    L["Whisper"] = true
+    L["Map ping"] = true
+    L["Alarm 1"] = true
+    L["Alarm 2"] = true
+    L["Alarm 3"] = true
+    L["Coins"] = true
+    L["Fishing reel"] = true
+    L["Clear selection"] = true
+    L["Destinations"] = true
+    L["Messages"] = true
+    L["Format"] = true
+    L["Fishing mode"] = true
+    L["Use general filters"] = true
+    L["Profile maintenance"] = true
+    L["Profile maintenance help"] = "Reset restores the active profile's defaults. Delete removes a different saved profile. Both actions require confirmation."
+    L["Reset profile confirmation"] = "Reset the active profile to its default settings?"
+    L["List add instructions"] = "Drag an item into the field to add it, or enter its name or ID and click Add."
+    L["Loot all status"] = "Loot everything is active: Price and Rarity do not limit collection. Exclusion filters still apply."
+    L["Alert empty list help"] = "No alerts configured. Add an item above to receive an alert when it appears in loot."
+    L["Fishing mode help"] = "General filters use your normal loot rules. Whitelist mode collects only listed items, including fish-tagged entries. Disable WoW Auto Loot and other automatic-loot addons to let AutoLooter control fishing loot."
+    L["Item lists"] = true
+    L["Price slider help"] = "Minimum item value for automatic looting. Increments of 10 silver, up to 20 gold. At 0 this filter is disabled. Other enabled filters may still collect cheaper items."
+    L["Auctionator option help"] = "Also checks Auctionator's available auction prices for the Price filter. Collects an item when its vendor value or known auction price reaches the threshold. Requires Auctionator for auction prices."
+    L["Ignore BoP option help"] = "Skips bind-on-pickup items. Whitelisted items take priority over this filter."
+    L["Fishing all option help"] = "Collects all fishing loot unless an earlier blocking filter excludes it. Selecting this mode turns off the other Fishing modes."
+    L["Fishing none option help"] = "AutoLooter collects nothing while fishing, including whitelisted items. Useful with Fishing Buddy. This does not stop WoW Auto Loot or other addons. Selecting this mode turns off the other Fishing modes."
+    L["Whitelist empty list help"] = "No items to show here. Drag an item into the field above, or enter its name or ID. Items marked as fish appear in Fishing."
+    L["Blacklist empty list help"] = "No items excluded. Drag an item into the field above, or enter its name or ID."
+    L["Fishing empty list help"] = "No fish added. Add an item in Whitelist, then use the fish button beside it to mark it as a fish."
+    L["Item category"] = true
+    L["Advanced options"] = true
+    L["Hold and drag to move"] = true
+    L["Ignore BoP"] = true
+    L["Ignore Fishing"] = true
+    L["Ignore greys when looting by type"] = true
+    L["Ignored"] = true
+    L["Integration"] = true
+    L["Invalid item"] = true
+    L["Items list"] = true
+    L["Mark as fish"] = true
+    L["Remove fish tag"] = true
+    L["Left-click"] = true
+    L["Listed"] = true
+    L["Load Profile"] = true
+    L["Load profile '${profile}' and reload UI?"] = true
+    L["Locked"] = true
+    L["Loot by Price"] = true
+    L["Loot by Rarity"] = true
+    L["Loot everything"] = true
+    L["Loot everything while Fishing"] = true
+    L["Loot everything with a price greater or equal to this value"] = true
+    L["Loot quest items"] = true
+    L["Not listed"] = true
+    L["Off"] = true
+    L["On"] = true
+    L["Price"] = true
+    L["Price (in coppers)"] = true
+    L["Print items others receive"] = true
+    L["Print items you receive"] = true
+    L["Printout chat frames"] = true
+    L["Printout commands at login"] = true
+    L["Printout items icon only"] = true
+    L["Printout items ignored"] = true
+    L["Printout items looted"] = true
+    L["Printout items type"] = true
+    L["Printout reason of loot"] = true
+    L["Quest"] = true
+    L["Rarity"] = true
+    L["Received Items"] = true
+    L["Received items group Delay (ms)"] = true
+    L["Remove all"] = true
+    L["Remove item from alert list"] = true
+    L["Remove item from ignore list"] = true
+    L["Remove item from white list"] = true
+    L["Remove old entries"] = true
+    L["Removed"] = true
+    L["Right-click"] = true
+    L["Right-click to show profile menu"] = true
+    L["Select all"] = true
+    L["Set alert sound"] = true
+    L["Show/Hide minimap button"] = true
+    L["Show/Hide UI"] = true
+    L["This can be useful to let addons like Fishing Buddy do its work"] = true
+    L["This will cleanup and recreate the type database"] = true
+    L["This will remove old types/subtypes entries from the database"] = true
+    L["to Enable/Disable loot all"] = true
+    L["to Show/Hide UI"] = true
+    L["Token"] = true
+    L["Try to show loot animation"] = true
+    L["Type"] = true
+    L["Whitelist"] = true
+    L["You"] = true
+    L["You can drag & drop items here!"] = true
+    L["Chat"] = true
+    L["Old Entries"] = "Old entries"
+    L["[link/id/name] or [mouse over]"] = "[link/ID/name] or [mouse over]"
+    L["Addon Language"] = true
+    L["Client Language"] = true
+    L["Apply language and reload UI"] = true
+    L["Addon language help"] = "Choose the language for AutoLooter. This preference is shared by all profiles and characters. Reload the UI to apply a different language. Item names and game-provided text still use the client language."
+    L["Existing profiles"] = true
+    L["New profile"] = true
+    L["Copy from profile"] = true
+    L["Reset profile"] = true
+    L["Delete profile"] = true
+    L["Delete profile confirmation"] = "Delete the selected profile?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "ptBR")
 if L then
-	L["(Legacy Types)"] = "(Tipos Legados)"
-L["Add item to alert list"] = "Adiciona um item na lista de alertas"
-L["Add item to ignore list"] = "Adiciona um item na lista de ignorados"
-L["Add item to white list"] = "Adiciona um item na lista branca"
-L["Added"] = "Adicionado"
-L["Alert List"] = "Lista de Alertas"
-L["All"] = "Tudo"
-L["All items received between this delay will be grouped"] = "Todos os itens recebidos dentro deste intervalo serão agrupados"
-L["Already in the list"] = "Já está na lista"
-L["Auto confirm loot roll"] = "Confirmar automaticamente a rolagem de saque"
-L["Blacklist"] = "Lista Negra"
-L["Close"] = "Fechar"
-L["Close after loot"] = "Fechar após saquear"
-L["Coin"] = "Moeda"
-L["Disabled"] = "Desligado"
-L["Don't loot anything while Fishing"] = "Não saquear nada durante a pesca"
-L["Enable AutoLooter"] = "Ativar AutoLooter"
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter não irá pegar nenhum item quando o Saque automático do WoW estiver funcionando!
-
-Isso possibilita utilizar a tecla de saque para ativar/desativar o AutoLooter por alvo.
-
-Você pode configurar essas opções em 'Menu > Interface > Controles'.]=]
-L["Enabled"] = "Ativado"
-L["Fast loot"] = "Saque rápido"
-L["Fishing"] = "Pescaria"
-L["General"] = "Geral"
-L["Hold and drag to move"] = "Segure e arraste para mover"
-L["Ignore BoP"] = "Ignorar BoP"
-L["Ignore Fishing"] = "Ignorar pesca"
-L["Ignore greys when looting by type"] = "Ignorar cinzas ao saquear por tipo"
-L["Ignored"] = "Ignorado"
-L["Integration"] = "Integração"
-L["Invalid item"] = "Item inválido"
-L["Items list"] = "Lista de itens"
-L["Left-click"] = "Clique esquerdo"
-L["Listed"] = "Na lista"
-L["Load Profile"] = "Carregar perfil"
-L["Load profile '${profile}' and reload UI?"] = "Carregar o perfil '${profile}' e recarregar a interface?"
-L["Locked"] = "Bloqueado"
-L["Loot by Price"] = "Saque por preço"
-L["Loot by Rarity"] = "Saque por raridade"
-L["Loot everything"] = "Saque tudo"
-L["Loot everything while Fishing"] = "Saque tudo durante a pesca"
-L["Loot everything with a price greater or equal to this value"] = "Saquear todos os itens com preço maior ou igual a este valor"
-L["Loot quest items"] = "Saquear itens de missão"
-L["Not listed"] = "Não listado"
-L["Off"] = "Desligado"
-L["On"] = "Ligado"
-L["Price"] = "Preço"
-L["Price (in coppers)"] = "Preço (em cobres)"
-L["Print items others receive"] = "Mostrar os itens que outros recebem"
-L["Print items you receive"] = "Mostrar os itens que você recebe"
-L["Printout chat frames"] = "Janelas de chat para exibição"
-L["Printout commands at login"] = "Exibir comandos durante o login"
-L["Printout items icon only"] = "Exibir apenas o ícone dos itens"
-L["Printout items ignored"] = "Escrever ignorados"
-L["Printout items looted"] = "Mostrar itens saqueados"
-L["Printout items type"] = "Mostrar o tipo dos itens"
-L["Printout reason of loot"] = "Mostrar o motivo do saque"
-L["Quest"] = "Missão"
-L["Rarity"] = "Raridade"
-L["Received Items"] = "Itens recebidos"
-L["Received items group Delay (ms)"] = "Atraso para agrupar itens recebidos (ms)"
-L["Remove all"] = "Remover todos"
-L["Remove item from alert list"] = "Remove um item da lista de alertas"
-L["Remove item from ignore list"] = "Remove um item da lista de ignorados"
-L["Remove item from white list"] = "Remove um item da lista branca"
-L["Remove old entries"] = "Remover registros antigos"
-L["Removed"] = "Removido"
-L["Right-click"] = "Clique direito"
-L["Right-click to show profile menu"] = "Clique direito para mostrar o menu de perfil"
-L["Select all"] = "Selecionar tudo"
-L["Set alert sound"] = "Altera o som de alerta"
-L["Show/Hide minimap button"] = "Mostrar/Ocultar o botão do minimapa"
-L["Show/Hide UI"] = "Mostrar/Ocultar a interface"
-L["This can be useful to let addons like Fishing Buddy do its work"] = "Isso pode ser útil para permitir que addons como o Fishing Buddy façam seu trabalho"
-L["This will cleanup and recreate the type database"] = "Isso limpará e recriará o banco de dados de tipos"
-L["This will remove old types/subtypes entries from the database"] = "Isso removerá entradas antigas de tipos/subtipos do banco de dados"
-L["to Enable/Disable loot all"] = "para Ativar/Desativar 'saquear tudo'"
-L["to Show/Hide UI"] = "para Mostrar/Ocultar a interface"
-L["Token"] = "Ficha"
-L["Try to show loot animation"] = "Tentar exibir a animação de saque"
-L["Type"] = "Tipo"
-L["Whitelist"] = "Whitelist"
-L["You"] = "Você"
-L["You can drag & drop items here!"] = "Você pode arrastar e soltar itens aqui!"
-
-
-	return
+    L["(Legacy Types)"] = "(Tipos Legados)"
+    L["Add item to alert list"] = "Adiciona um item na lista de alertas"
+    L["Add item to ignore list"] = "Adicionar item à lista de exclusão"
+    L["Add item to white list"] = "Adicionar item à lista permitida"
+    L["Added"] = "Adicionado"
+    L["Alert List"] = "Lista de Alertas"
+    L["All"] = "Tudo"
+    L["All items received between this delay will be grouped"] = "Todos os itens recebidos dentro deste intervalo serão agrupados"
+    L["Already in the list"] = "Já está na lista"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Ativar integração com Auctionator para verificar preços"
+    L["Auto confirm loot roll"] = "Confirmar automaticamente a rolagem de saque"
+    L["Blacklist"] = "Lista de exclusão"
+    L["Close"] = "Fechar"
+    L["Close after loot"] = "Fechar após saquear"
+    L["Coin"] = "Moeda"
+    L["Disabled"] = "Desligado"
+    L["Don't loot anything while Fishing"] = "Não saquear nada durante a pesca"
+    L["Loot only whitelisted items while Fishing"] = "Saquear apenas itens da lista permitida durante a pesca"
+    L["Fishing whitelist mode description"] = "Durante a pesca, saqueie apenas itens da lista permitida do perfil atual, incluindo os marcados como peixes. Ignore as regras gerais de raridade, preço, tipo e saque de tudo para os demais itens. Uma lista vazia não saqueia nada. Desative o Saque automático do WoW e outros addons de saque automático; este modo não impede que eles saqueiem itens."
+    L["Enable AutoLooter"] = "Ativar AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter não irá pegar nenhum item quando o Saque automático do WoW estiver funcionando!\n\nIsso possibilita utilizar a tecla de saque para ativar/desativar o AutoLooter por alvo.\n\nVocê pode configurar essas opções em 'Menu > Interface > Controles'."
+    L["Enabled"] = "Ativado"
+    L["Fast loot"] = "Saque rápido"
+    L["Fishing"] = "Pescaria"
+    L["Fishes (added in Whitelist)"] = "Peixes (adicionados à lista permitida)"
+    L["General"] = "Geral"
+    L["Profiles"] = "Perfis"
+    L["Profile"] = "Perfil"
+    L["Other options"] = "Outras opções"
+    L["Settings"] = "Configurações"
+    L["Add"] = "Adicionar"
+    L["Create"] = "Criar"
+    L["Preview"] = "Ouvir"
+    L["Custom sound"] = "Som personalizado"
+    L["Raid warning"] = "Aviso de raide"
+    L["Ready check"] = "Verificação de prontidão"
+    L["Boss warning"] = "Aviso de chefe"
+    L["Whisper"] = "Sussurro"
+    L["Map ping"] = "Sinal no mapa"
+    L["Alarm 1"] = "Alarme 1"
+    L["Alarm 2"] = "Alarme 2"
+    L["Alarm 3"] = "Alarme 3"
+    L["Coins"] = "Moedas"
+    L["Fishing reel"] = "Fisgada"
+    L["Clear selection"] = "Limpar seleção"
+    L["Destinations"] = "Destinos"
+    L["Messages"] = "Mensagens"
+    L["Format"] = "Formato"
+    L["Fishing mode"] = "Modo de pesca"
+    L["Use general filters"] = "Usar filtros gerais"
+    L["Profile maintenance"] = "Gerenciar perfis"
+    L["Profile maintenance help"] = "Redefinir restaura os padrões do perfil ativo. Excluir remove outro perfil salvo. Ambas as ações exigem confirmação."
+    L["Reset profile confirmation"] = "Redefinir o perfil ativo para as configurações padrão?"
+    L["List add instructions"] = "Arraste um item para o campo para adicioná-lo ou digite seu nome ou ID e clique em Adicionar."
+    L["Loot all status"] = "Saquear tudo está ativo: Preço e Raridade não limitam o saque. Os filtros de exclusão continuam valendo."
+    L["Alert empty list help"] = "Nenhum alerta configurado. Adicione um item acima para receber um alerta quando ele aparecer no saque."
+    L["Fishing mode help"] = "Os filtros gerais usam suas regras normais de saque. O modo de lista permitida saqueia apenas itens listados, incluindo os marcados como peixes. Desative o Saque automático do WoW e outros addons de saque automático para que AutoLooter controle o saque da pesca."
+    L["Item lists"] = "Listas de itens"
+    L["Price slider help"] = "Valor mínimo para saquear automaticamente um item. Incrementos de 10 pratas, até 20 ouros. Em 0, este filtro fica desativado. Outros filtros ativos ainda podem saquear itens mais baratos."
+    L["Auctionator option help"] = "Também verifica os preços de leilão disponíveis no Auctionator para o filtro de Preço. Saqueia um item quando seu valor de venda ao vendedor ou preço de leilão conhecido atinge o limite. Os preços de leilão exigem Auctionator."
+    L["Ignore BoP option help"] = "Ignora itens vinculados ao serem coletados. Os itens da lista permitida têm prioridade sobre este filtro."
+    L["Fishing all option help"] = "Saqueia tudo da pesca, exceto quando um filtro de bloqueio anterior exclui o item. Selecionar este modo desativa os outros modos de pesca."
+    L["Fishing none option help"] = "AutoLooter não saqueia nada durante a pesca, nem itens da lista permitida. Útil com Fishing Buddy. Isso não impede o Saque automático do WoW ou outros addons. Selecionar este modo desativa os outros modos de pesca."
+    L["Whitelist empty list help"] = "Nenhum item para mostrar aqui. Arraste um item para o campo acima ou digite seu nome ou ID. Os itens marcados como peixes aparecem em Pesca."
+    L["Blacklist empty list help"] = "Nenhum item excluído. Arraste um item para o campo acima ou digite seu nome ou ID."
+    L["Fishing empty list help"] = "Nenhum peixe adicionado. Adicione um item à lista permitida e use o botão de peixe ao lado dele para marcá-lo como peixe."
+    L["Item category"] = "Categoria de item"
+    L["Advanced options"] = "Opções avançadas"
+    L["Hold and drag to move"] = "Segure e arraste para mover"
+    L["Ignore BoP"] = "Ignorar BoP"
+    L["Ignore Fishing"] = "Ignorar pesca"
+    L["Ignore greys when looting by type"] = "Ignorar cinzas ao saquear por tipo"
+    L["Ignored"] = "Ignorado"
+    L["Integration"] = "Integração"
+    L["Invalid item"] = "Item inválido"
+    L["Items list"] = "Lista de itens"
+    L["Mark as fish"] = "Marcar como peixe"
+    L["Remove fish tag"] = "Remover marcação de peixe"
+    L["Left-click"] = "Clique esquerdo"
+    L["Listed"] = "Na lista"
+    L["Load Profile"] = "Carregar perfil"
+    L["Load profile '${profile}' and reload UI?"] = "Carregar o perfil '${profile}' e recarregar a interface?"
+    L["Locked"] = "Bloqueado"
+    L["Loot by Price"] = "Saque por preço"
+    L["Loot by Rarity"] = "Saque por raridade"
+    L["Loot everything"] = "Saque tudo"
+    L["Loot everything while Fishing"] = "Saque tudo durante a pesca"
+    L["Loot everything with a price greater or equal to this value"] = "Saquear todos os itens com preço maior ou igual a este valor"
+    L["Loot quest items"] = "Saquear itens de missão"
+    L["Not listed"] = "Não listado"
+    L["Off"] = "Desligado"
+    L["On"] = "Ligado"
+    L["Price"] = "Preço"
+    L["Price (in coppers)"] = "Preço (em cobres)"
+    L["Print items others receive"] = "Mostrar os itens que outros recebem"
+    L["Print items you receive"] = "Mostrar os itens que você recebe"
+    L["Printout chat frames"] = "Janelas de chat para exibição"
+    L["Printout commands at login"] = "Exibir comandos durante o login"
+    L["Printout items icon only"] = "Exibir apenas o ícone dos itens"
+    L["Printout items ignored"] = "Escrever ignorados"
+    L["Printout items looted"] = "Mostrar itens saqueados"
+    L["Printout items type"] = "Mostrar o tipo dos itens"
+    L["Printout reason of loot"] = "Mostrar o motivo do saque"
+    L["Quest"] = "Missão"
+    L["Rarity"] = "Raridade"
+    L["Received Items"] = "Itens recebidos"
+    L["Received items group Delay (ms)"] = "Atraso para agrupar itens recebidos (ms)"
+    L["Remove all"] = "Remover todos"
+    L["Remove item from alert list"] = "Remove um item da lista de alertas"
+    L["Remove item from ignore list"] = "Remover item da lista de exclusão"
+    L["Remove item from white list"] = "Remover item da lista permitida"
+    L["Remove old entries"] = "Remover registros antigos"
+    L["Removed"] = "Removido"
+    L["Right-click"] = "Clique direito"
+    L["Right-click to show profile menu"] = "Clique direito para mostrar o menu de perfil"
+    L["Select all"] = "Selecionar tudo"
+    L["Set alert sound"] = "Altera o som de alerta"
+    L["Show/Hide minimap button"] = "Mostrar/Ocultar o botão do minimapa"
+    L["Show/Hide UI"] = "Mostrar/Ocultar a interface"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Isso pode ser útil para permitir que addons como o Fishing Buddy façam seu trabalho"
+    L["This will cleanup and recreate the type database"] = "Isso limpará e recriará o banco de dados de tipos"
+    L["This will remove old types/subtypes entries from the database"] = "Isso removerá entradas antigas de tipos/subtipos do banco de dados"
+    L["to Enable/Disable loot all"] = "para Ativar/Desativar 'saquear tudo'"
+    L["to Show/Hide UI"] = "para Mostrar/Ocultar a interface"
+    L["Token"] = "Ficha"
+    L["Try to show loot animation"] = "Tentar exibir a animação de saque"
+    L["Type"] = "Tipo"
+    L["Whitelist"] = "Lista permitida"
+    L["You"] = "Você"
+    L["You can drag & drop items here!"] = "Você pode arrastar e soltar itens aqui!"
+    L["Chat"] = "Conversa"
+    L["Old Entries"] = "Registros antigos"
+    L["[link/id/name] or [mouse over]"] = "[link/ID/nome] ou [sob o cursor]"
+    L["Addon Language"] = "Idioma do addon"
+    L["Client Language"] = "Idioma do cliente"
+    L["Apply language and reload UI"] = "Aplicar idioma e recarregar interface"
+    L["Addon language help"] = "Escolha o idioma do AutoLooter. Esta preferência vale para todos os perfis e personagens. Recarregue a interface para aplicar outro idioma. Os nomes dos itens e os textos fornecidos pelo jogo continuam no idioma do cliente."
+    L["Existing profiles"] = "Perfis existentes"
+    L["New profile"] = "Novo perfil"
+    L["Copy from profile"] = "Copiar do perfil"
+    L["Reset profile"] = "Redefinir perfil"
+    L["Delete profile"] = "Excluir perfil"
+    L["Delete profile confirmation"] = "Excluir o perfil selecionado?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "frFR")
 if L then
-	L["(Legacy Types)"] = "(Types hérités)"
-L["Add item to alert list"] = "Ajouter un objet à la Alert List"
-L["Add item to ignore list"] = "Ajouter un objet à la ignore list"
-L["Add item to white list"] = "Ajouter un objet à la white list"
-L["Added"] = "Ajouté"
-L["Alert List"] = "Alert List"
-L["All"] = "Tout"
-L["All items received between this delay will be grouped"] = "Tous les objets reçus pendant ce délai seront groupés"
-L["Already in the list"] = "Déjà dans la liste"
-L["Auto confirm loot roll"] = "Confirmer automatiquement les jets de butin"
-L["Blacklist"] = "Blacklist"
-L["Close"] = "Fermer"
-L["Close after loot"] = "Fermer après le butin"
-L["Coin"] = "Pièce"
-L["Disabled"] = "Désactivé"
-L["Don't loot anything while Fishing"] = "Ne rien ramasser pendant la pêche"
-L["Enable AutoLooter"] = "Activer AutoLooter"
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter ne ramassera rien lorsque l’option de Butin automatique de WoW effectue le butin !
-
-Ceci vous permet d’utiliser la touche de Butin automatique pour activer/désactiver AutoLooter selon la cible.
-
-Vous pouvez configurer ces options dans « Menu > Interface > Commandes ».]=]
-L["Enabled"] = "Activé"
-L["Fast loot"] = "Butin rapide"
-L["Fishing"] = "Pêche"
-L["General"] = "Général"
-L["Hold and drag to move"] = "Maintenez et faites glisser pour déplacer"
-L["Ignore BoP"] = "Ignorer BoP"
-L["Ignore Fishing"] = "Ignorer la pêche"
-L["Ignore greys when looting by type"] = "Ignorer les objets gris lors du butin par type"
-L["Ignored"] = "Ignoré"
-L["Integration"] = "Intégration"
-L["Invalid item"] = "Objet invalide"
-L["Items list"] = "Liste des objets"
-L["Left-click"] = "Clic gauche"
-L["Listed"] = "Listé"
-L["Load Profile"] = "Charger le profil"
-L["Load profile '${profile}' and reload UI?"] = "Charger le profil « ${profile} » et recharger l’interface ?"
-L["Locked"] = "Verrouillé"
-L["Loot by Price"] = "Butin par prix"
-L["Loot by Rarity"] = "Butin par rareté"
-L["Loot everything"] = "Tout ramasser"
-L["Loot everything while Fishing"] = "Tout ramasser pendant la pêche"
-L["Loot everything with a price greater or equal to this value"] = "Ramasser tout objet d’un prix supérieur ou égal à cette valeur"
-L["Loot quest items"] = "Ramasser les objets de quête"
-L["Not listed"] = "Non listé"
-L["Off"] = "Désactivé"
-L["On"] = "Activé"
-L["Price"] = "Prix"
-L["Price (in coppers)"] = "Prix (en cuivres)"
-L["Print items others receive"] = "Afficher les objets reçus par les autres"
-L["Print items you receive"] = "Afficher les objets que vous recevez"
-L["Printout chat frames"] = "Fenêtres de chat pour l’affichage"
-L["Printout commands at login"] = "Afficher les commandes à la connexion"
-L["Printout items icon only"] = "N’afficher que l’icône des objets"
-L["Printout items ignored"] = "Afficher les objets ignorés"
-L["Printout items looted"] = "Afficher les objets ramassés"
-L["Printout items type"] = "Afficher le type d’objets"
-L["Printout reason of loot"] = "Afficher la raison du butin"
-L["Quest"] = "Quête"
-L["Rarity"] = "Rareté"
-L["Received Items"] = "Objets reçus"
-L["Received items group Delay (ms)"] = "Délai de regroupement des objets reçus (ms)"
-L["Remove all"] = "Tout supprimer"
-L["Remove item from alert list"] = "Retirer un objet de la Alert List"
-L["Remove item from ignore list"] = "Retirer un objet de la ignore list"
-L["Remove item from white list"] = "Retirer un objet de la white list"
-L["Remove old entries"] = "Supprimer les anciennes entrées"
-L["Removed"] = "Supprimé"
-L["Right-click"] = "Clic droit"
-L["Right-click to show profile menu"] = "Clic droit pour afficher le menu du profil"
-L["Select all"] = "Tout sélectionner"
-L["Set alert sound"] = "Définir le son d’alerte"
-L["Show/Hide minimap button"] = "Afficher/Masquer le bouton de la minicarte"
-L["Show/Hide UI"] = "Afficher/Masquer l’interface"
-L["This can be useful to let addons like Fishing Buddy do its work"] = "Utile pour laisser des addons comme Fishing Buddy faire leur travail"
-L["This will cleanup and recreate the type database"] = "Ceci va nettoyer et recréer la base de données des types"
-L["This will remove old types/subtypes entries from the database"] = "Ceci va supprimer les anciennes entrées de types/sous‑types de la base de données"
-L["to Enable/Disable loot all"] = "pour Activer/Désactiver ‘tout ramasser’"
-L["to Show/Hide UI"] = "pour Afficher/Masquer l’interface"
-L["Token"] = "Jeton"
-L["Try to show loot animation"] = "Essayer d’afficher l’animation de butin"
-L["Type"] = "Type"
-L["Whitelist"] = "Whitelist"
-L["You"] = "Vous"
-L["You can drag & drop items here!"] = "Vous pouvez glisser‑déposer des objets ici !"
-
-	return
+    L["(Legacy Types)"] = "(Types hérités)"
+    L["Add item to alert list"] = "Ajouter un objet à la liste d’alertes"
+    L["Add item to ignore list"] = "Ajouter un objet à la liste d’exclusion"
+    L["Add item to white list"] = "Ajouter un objet à la liste autorisée"
+    L["Added"] = "Ajouté"
+    L["Alert List"] = "Liste d’alertes"
+    L["All"] = "Tout"
+    L["All items received between this delay will be grouped"] = "Tous les objets reçus pendant ce délai seront groupés"
+    L["Already in the list"] = "Déjà dans la liste"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Activer l’intégration d’Auctionator pour vérifier les prix"
+    L["Auto confirm loot roll"] = "Confirmer automatiquement les jets de butin"
+    L["Blacklist"] = "Liste d’exclusion"
+    L["Close"] = "Fermer"
+    L["Close after loot"] = "Fermer après le butin"
+    L["Coin"] = "Pièce"
+    L["Disabled"] = "Désactivé"
+    L["Don't loot anything while Fishing"] = "Ne rien ramasser pendant la pêche"
+    L["Loot only whitelisted items while Fishing"] = "Ramasser uniquement les objets autorisés pendant la pêche"
+    L["Fishing whitelist mode description"] = "Pendant la pêche, ramasse uniquement les objets de la liste autorisée du profil actuel, y compris ceux marqués comme poissons. Ignore les règles générales de rareté, prix, type et ramassage intégral pour les autres objets. Une liste vide ne ramasse rien. Désactivez le butin automatique de WoW et les autres addons de ramassage automatique ; ce mode ne peut pas les empêcher de ramasser des objets."
+    L["Enable AutoLooter"] = "Activer AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter ne ramassera rien lorsque l’option de Butin automatique de WoW effectue le butin !\n\nCeci vous permet d’utiliser la touche de Butin automatique pour activer/désactiver AutoLooter selon la cible.\n\nVous pouvez configurer ces options dans « Menu > Interface > Commandes »."
+    L["Enabled"] = "Activé"
+    L["Fast loot"] = "Butin rapide"
+    L["Fishing"] = "Pêche"
+    L["Fishes (added in Whitelist)"] = "Poissons (ajoutés à la liste autorisée)"
+    L["General"] = "Général"
+    L["Profiles"] = "Profils"
+    L["Profile"] = "Profil"
+    L["Other options"] = "Autres options"
+    L["Settings"] = "Paramètres"
+    L["Add"] = "Ajouter"
+    L["Create"] = "Créer"
+    L["Preview"] = "Écouter"
+    L["Custom sound"] = "Son personnalisé"
+    L["Raid warning"] = "Avertissement de raid"
+    L["Ready check"] = "Appel"
+    L["Boss warning"] = "Avertissement de boss"
+    L["Whisper"] = "Chuchotement"
+    L["Map ping"] = "Signal sur la carte"
+    L["Alarm 1"] = "Alarme 1"
+    L["Alarm 2"] = "Alarme 2"
+    L["Alarm 3"] = "Alarme 3"
+    L["Coins"] = "Pièces"
+    L["Fishing reel"] = "Poisson ferré"
+    L["Clear selection"] = "Effacer la sélection"
+    L["Destinations"] = "Destinations"
+    L["Messages"] = "Messages"
+    L["Format"] = "Format"
+    L["Fishing mode"] = "Mode de pêche"
+    L["Use general filters"] = "Utiliser les filtres généraux"
+    L["Profile maintenance"] = "Gestion des profils"
+    L["Profile maintenance help"] = "Réinitialiser restaure les valeurs par défaut du profil actif. Supprimer retire un autre profil enregistré. Ces deux actions demandent confirmation."
+    L["Reset profile confirmation"] = "Réinitialiser le profil actif à ses paramètres par défaut ?"
+    L["List add instructions"] = "Glissez un objet dans le champ pour l’ajouter, ou saisissez son nom ou son ID puis cliquez sur Ajouter."
+    L["Loot all status"] = "Tout ramasser est actif : Prix et Rareté ne limitent pas le ramassage. Les filtres d’exclusion restent actifs."
+    L["Alert empty list help"] = "Aucune alerte configurée. Ajoutez un objet ci-dessus pour être averti lorsqu’il apparaît dans le butin."
+    L["Fishing mode help"] = "Les filtres généraux appliquent vos règles habituelles de butin. Le mode de liste autorisée ramasse uniquement les objets listés, y compris ceux marqués comme poissons. Désactivez le butin automatique de WoW et les autres addons de ramassage automatique pour laisser AutoLooter gérer le butin de pêche."
+    L["Item lists"] = "Listes d’objets"
+    L["Price slider help"] = "Valeur minimale d’un objet pour le ramassage automatique. Pas de 10 pièces d’argent, jusqu’à 20 pièces d’or. À 0, ce filtre est désactivé. D’autres filtres actifs peuvent encore ramasser des objets moins chers."
+    L["Auctionator option help"] = "Vérifie aussi les prix d’enchères disponibles dans Auctionator pour le filtre Prix. Ramasse un objet lorsque sa valeur de vente à un marchand ou son prix d’enchères connu atteint le seuil. Auctionator est requis pour les prix d’enchères."
+    L["Ignore BoP option help"] = "Ignore les objets liés quand ramassés. Les objets de la liste autorisée ont priorité sur ce filtre."
+    L["Fishing all option help"] = "Ramasse tout le butin de pêche, sauf si un filtre de blocage précédent l’exclut. Choisir ce mode désactive les autres modes de pêche."
+    L["Fishing none option help"] = "AutoLooter ne ramasse rien pendant la pêche, même les objets autorisés. Utile avec Fishing Buddy. Cela n’empêche pas le butin automatique de WoW ni les autres addons. Choisir ce mode désactive les autres modes de pêche."
+    L["Whitelist empty list help"] = "Aucun objet à afficher ici. Glissez un objet dans le champ ci-dessus, ou saisissez son nom ou son ID. Les objets marqués comme poissons apparaissent dans Pêche."
+    L["Blacklist empty list help"] = "Aucun objet exclu. Glissez un objet dans le champ ci-dessus, ou saisissez son nom ou son ID."
+    L["Fishing empty list help"] = "Aucun poisson ajouté. Ajoutez un objet à la liste autorisée, puis utilisez le bouton poisson à côté pour le marquer comme poisson."
+    L["Item category"] = "Catégorie d’objet"
+    L["Advanced options"] = "Options avancées"
+    L["Hold and drag to move"] = "Maintenez et faites glisser pour déplacer"
+    L["Ignore BoP"] = "Ignorer BoP"
+    L["Ignore Fishing"] = "Ignorer la pêche"
+    L["Ignore greys when looting by type"] = "Ignorer les objets gris lors du butin par type"
+    L["Ignored"] = "Ignoré"
+    L["Integration"] = "Intégration"
+    L["Invalid item"] = "Objet invalide"
+    L["Items list"] = "Liste des objets"
+    L["Mark as fish"] = "Marquer comme poisson"
+    L["Remove fish tag"] = "Retirer la marque de poisson"
+    L["Left-click"] = "Clic gauche"
+    L["Listed"] = "Listé"
+    L["Load Profile"] = "Charger le profil"
+    L["Load profile '${profile}' and reload UI?"] = "Charger le profil « ${profile} » et recharger l’interface ?"
+    L["Locked"] = "Verrouillé"
+    L["Loot by Price"] = "Butin par prix"
+    L["Loot by Rarity"] = "Butin par rareté"
+    L["Loot everything"] = "Tout ramasser"
+    L["Loot everything while Fishing"] = "Tout ramasser pendant la pêche"
+    L["Loot everything with a price greater or equal to this value"] = "Ramasser tout objet d’un prix supérieur ou égal à cette valeur"
+    L["Loot quest items"] = "Ramasser les objets de quête"
+    L["Not listed"] = "Non listé"
+    L["Off"] = "Désactivé"
+    L["On"] = "Activé"
+    L["Price"] = "Prix"
+    L["Price (in coppers)"] = "Prix (en cuivres)"
+    L["Print items others receive"] = "Afficher les objets reçus par les autres"
+    L["Print items you receive"] = "Afficher les objets que vous recevez"
+    L["Printout chat frames"] = "Fenêtres de chat pour l’affichage"
+    L["Printout commands at login"] = "Afficher les commandes à la connexion"
+    L["Printout items icon only"] = "N’afficher que l’icône des objets"
+    L["Printout items ignored"] = "Afficher les objets ignorés"
+    L["Printout items looted"] = "Afficher les objets ramassés"
+    L["Printout items type"] = "Afficher le type d’objets"
+    L["Printout reason of loot"] = "Afficher la raison du butin"
+    L["Quest"] = "Quête"
+    L["Rarity"] = "Rareté"
+    L["Received Items"] = "Objets reçus"
+    L["Received items group Delay (ms)"] = "Délai de regroupement des objets reçus (ms)"
+    L["Remove all"] = "Tout supprimer"
+    L["Remove item from alert list"] = "Retirer un objet de la liste d’alertes"
+    L["Remove item from ignore list"] = "Retirer un objet de la liste d’exclusion"
+    L["Remove item from white list"] = "Retirer un objet de la liste autorisée"
+    L["Remove old entries"] = "Supprimer les anciennes entrées"
+    L["Removed"] = "Supprimé"
+    L["Right-click"] = "Clic droit"
+    L["Right-click to show profile menu"] = "Clic droit pour afficher le menu du profil"
+    L["Select all"] = "Tout sélectionner"
+    L["Set alert sound"] = "Définir le son d’alerte"
+    L["Show/Hide minimap button"] = "Afficher/Masquer le bouton de la minicarte"
+    L["Show/Hide UI"] = "Afficher/Masquer l’interface"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Utile pour laisser des addons comme Fishing Buddy faire leur travail"
+    L["This will cleanup and recreate the type database"] = "Ceci va nettoyer et recréer la base de données des types"
+    L["This will remove old types/subtypes entries from the database"] = "Ceci va supprimer les anciennes entrées de types/sous‑types de la base de données"
+    L["to Enable/Disable loot all"] = "pour Activer/Désactiver ‘tout ramasser’"
+    L["to Show/Hide UI"] = "pour Afficher/Masquer l’interface"
+    L["Token"] = "Jeton"
+    L["Try to show loot animation"] = "Essayer d’afficher l’animation de butin"
+    L["Type"] = "Type d’objet"
+    L["Whitelist"] = "Liste autorisée"
+    L["You"] = "Vous"
+    L["You can drag & drop items here!"] = "Vous pouvez glisser‑déposer des objets ici !"
+    L["Chat"] = "Discussion"
+    L["Old Entries"] = "Anciennes entrées"
+    L["[link/id/name] or [mouse over]"] = "[lien/ID/nom] ou [sous le curseur]"
+    L["Addon Language"] = "Langue de l’addon"
+    L["Client Language"] = "Langue du client"
+    L["Apply language and reload UI"] = "Appliquer la langue et recharger l’interface"
+    L["Addon language help"] = "Choisissez la langue d’AutoLooter. Ce choix est partagé par tous les profils et personnages. Rechargez l’interface pour appliquer une autre langue. Les noms d’objets et les textes fournis par le jeu restent dans la langue du client."
+    L["Existing profiles"] = "Profils existants"
+    L["New profile"] = "Nouveau profil"
+    L["Copy from profile"] = "Copier depuis un profil"
+    L["Reset profile"] = "Réinitialiser le profil"
+    L["Delete profile"] = "Supprimer le profil"
+    L["Delete profile confirmation"] = "Supprimer le profil sélectionné ?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "deDE")
 if L then
-	L["(Legacy Types)"] = "(Veraltete Typen)"
-L["Add item to alert list"] = "Gegenstand zur Alert List hinzufügen"
-L["Add item to ignore list"] = "Gegenstand zur ignore list hinzufügen"
-L["Add item to white list"] = "Gegenstand zur white list hinzufügen"
-L["Added"] = "Hinzugefügt"
-L["Alert List"] = "Alert List"
-L["All"] = "Alle"
-L["All items received between this delay will be grouped"] = "Alle innerhalb dieser Verzögerung erhaltenen Gegenstände werden gruppiert"
-L["Already in the list"] = "Bereits in der Liste"
-L["Auto confirm loot roll"] = "Beutewurf automatisch bestätigen"
-L["Blacklist"] = "Blacklist"
-L["Close"] = "Schließen"
-L["Close after loot"] = "Nach dem Plündern schließen"
-L["Coin"] = "Münze"
-L["Disabled"] = "Deaktiviert"
-L["Don't loot anything while Fishing"] = "Beim Angeln nichts plündern"
-L["Enable AutoLooter"] = "AutoLooter aktivieren"
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter plündert nichts, wenn die WoW‑Option "Autom. Plündern" aktiv ist!
-
-Dadurch kannst du die Taste für das automatische Plündern nutzen, um AutoLooter je nach Ziel ein-/auszuschalten.
-
-Du kannst diese Optionen unter "Menü > Interface > Steuerung" konfigurieren.]=]
-L["Enabled"] = "Aktiviert"
-L["Fast loot"] = "Schnelles Plündern"
-L["Fishing"] = "Angeln"
-L["General"] = "Allgemein"
-L["Hold and drag to move"] = "Zum Verschieben halten und ziehen"
-L["Ignore BoP"] = "BoP ignorieren"
-L["Ignore Fishing"] = "Angeln ignorieren"
-L["Ignore greys when looting by type"] = "Graue Gegenstände beim Plündern nach Typ ignorieren"
-L["Ignored"] = "Ignoriert"
-L["Integration"] = "Integration"
-L["Invalid item"] = "Ungültiger Gegenstand"
-L["Items list"] = "Gegenstandsliste"
-L["Left-click"] = "Linksklick"
-L["Listed"] = "Aufgelistet"
-L["Load Profile"] = "Profil laden"
-L["Load profile '${profile}' and reload UI?"] = "Profil \"${profile}\" laden und UI neu laden?"
-L["Locked"] = "Gesperrt"
-L["Loot by Price"] = "Beute nach Preis"
-L["Loot by Rarity"] = "Beute nach Seltenheit"
-L["Loot everything"] = "Alles plündern"
-L["Loot everything while Fishing"] = "Beim Angeln alles plündern"
-L["Loot everything with a price greater or equal to this value"] = "Alles plündern, dessen Preis größer oder gleich diesem Wert ist"
-L["Loot quest items"] = "Questgegenstände plündern"
-L["Not listed"] = "Nicht in der Liste"
-L["Off"] = "Aus"
-L["On"] = "An"
-L["Price"] = "Preis"
-L["Price (in coppers)"] = "Preis (in Kupfer)"
-L["Print items others receive"] = "Gegenstände anzeigen, die andere erhalten"
-L["Print items you receive"] = "Gegenstände anzeigen, die du erhältst"
-L["Printout chat frames"] = "Chatfenster für die Ausgabe"
-L["Printout commands at login"] = "Befehle beim Login anzeigen"
-L["Printout items icon only"] = "Nur das Gegenstandssymbol anzeigen"
-L["Printout items ignored"] = "Ignorierte Gegenstände anzeigen"
-L["Printout items looted"] = "Geplünderte Gegenstände anzeigen"
-L["Printout items type"] = "Gegenstandstyp anzeigen"
-L["Printout reason of loot"] = "Grund für die Beute anzeigen"
-L["Quest"] = "Quest"
-L["Rarity"] = "Seltenheit"
-L["Received Items"] = "Erhaltene Gegenstände"
-L["Received items group Delay (ms)"] = "Verzögerung zum Gruppieren erhaltener Gegenstände (ms)"
-L["Remove all"] = "Alle entfernen"
-L["Remove item from alert list"] = "Gegenstand aus der Alert List entfernen"
-L["Remove item from ignore list"] = "Gegenstand aus der ignore list entfernen"
-L["Remove item from white list"] = "Gegenstand aus der white list entfernen"
-L["Remove old entries"] = "Alte Einträge entfernen"
-L["Removed"] = "Entfernt"
-L["Right-click"] = "Rechtsklick"
-L["Right-click to show profile menu"] = "Rechtsklick, um das Profilmenü zu öffnen"
-L["Select all"] = "Alle auswählen"
-L["Set alert sound"] = "Warnton festlegen"
-L["Show/Hide minimap button"] = "Minimap-Schaltfläche anzeigen/ausblenden"
-L["Show/Hide UI"] = "UI anzeigen/ausblenden"
-L["This can be useful to let addons like Fishing Buddy do its work"] = "Nützlich, damit Addons wie Fishing Buddy ihre Arbeit machen können"
-L["This will cleanup and recreate the type database"] = "Dies bereinigt und erstellt die Typdatenbank neu"
-L["This will remove old types/subtypes entries from the database"] = "Dies entfernt alte Typen/Untertypen aus der Datenbank"
-L["to Enable/Disable loot all"] = "zum Aktivieren/Deaktivieren von \"Alles plündern\""
-L["to Show/Hide UI"] = "zum Anzeigen/Ausblenden der UI"
-L["Token"] = "Abzeichen"
-L["Try to show loot animation"] = "Versuchen, die Beuteanimation anzuzeigen"
-L["Type"] = "Typ"
-L["Whitelist"] = "Whitelist"
-L["You"] = "Du"
-L["You can drag & drop items here!"] = "Du kannst Gegenstände hierher ziehen und ablegen!"
-
-	return
+    L["(Legacy Types)"] = "(Veraltete Typen)"
+    L["Add item to alert list"] = "Gegenstand zur Warnliste hinzufügen"
+    L["Add item to ignore list"] = "Gegenstand zur Ausschlussliste hinzufügen"
+    L["Add item to white list"] = "Gegenstand zur Erlaubnisliste hinzufügen"
+    L["Added"] = "Hinzugefügt"
+    L["Alert List"] = "Warnliste"
+    L["All"] = "Alle"
+    L["All items received between this delay will be grouped"] = "Alle innerhalb dieser Verzögerung erhaltenen Gegenstände werden gruppiert"
+    L["Already in the list"] = "Bereits in der Liste"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Auctionator-Integration zur Preisprüfung aktivieren"
+    L["Auto confirm loot roll"] = "Beutewurf automatisch bestätigen"
+    L["Blacklist"] = "Ausschlussliste"
+    L["Close"] = "Schließen"
+    L["Close after loot"] = "Nach dem Plündern schließen"
+    L["Coin"] = "Münze"
+    L["Disabled"] = "Deaktiviert"
+    L["Don't loot anything while Fishing"] = "Beim Angeln nichts plündern"
+    L["Loot only whitelisted items while Fishing"] = "Beim Angeln nur erlaubte Gegenstände plündern"
+    L["Fishing whitelist mode description"] = "Beim Angeln werden nur Gegenstände aus der Erlaubnisliste des aktuellen Profils geplündert, einschließlich als Fisch markierter Gegenstände. Für andere Gegenstände werden die allgemeinen Regeln für Qualität, Preis, Typ und vollständiges Plündern ignoriert. Eine leere Liste plündert nichts. Deaktiviert die automatische Beute von WoW und andere Addons zum automatischen Plündern; dieser Modus kann deren Plündern nicht verhindern."
+    L["Enable AutoLooter"] = "AutoLooter aktivieren"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter plündert nichts, wenn die WoW‑Option \"Autom. Plündern\" aktiv ist!\n\nDadurch kannst du die Taste für das automatische Plündern nutzen, um AutoLooter je nach Ziel ein-/auszuschalten.\n\nDu kannst diese Optionen unter \"Menü > Interface > Steuerung\" konfigurieren."
+    L["Enabled"] = "Aktiviert"
+    L["Fast loot"] = "Schnelles Plündern"
+    L["Fishing"] = "Angeln"
+    L["Fishes (added in Whitelist)"] = "Fische (zur Erlaubnisliste hinzugefügt)"
+    L["General"] = "Allgemein"
+    L["Profiles"] = "Profile"
+    L["Profile"] = "Profil"
+    L["Other options"] = "Weitere Optionen"
+    L["Settings"] = "Einstellungen"
+    L["Add"] = "Hinzufügen"
+    L["Create"] = "Erstellen"
+    L["Preview"] = "Anhören"
+    L["Custom sound"] = "Benutzerdefinierter Sound"
+    L["Raid warning"] = "Schlachtzugswarnung"
+    L["Ready check"] = "Bereitschaftscheck"
+    L["Boss warning"] = "Bosswarnung"
+    L["Whisper"] = "Flüstern"
+    L["Map ping"] = "Kartensignal"
+    L["Alarm 1"] = "Alarm 1"
+    L["Alarm 2"] = "Alarm 2"
+    L["Alarm 3"] = "Alarm 3"
+    L["Coins"] = "Münzen"
+    L["Fishing reel"] = "Fisch an der Angel"
+    L["Clear selection"] = "Auswahl aufheben"
+    L["Destinations"] = "Ausgabeziele"
+    L["Messages"] = "Nachrichten"
+    L["Format"] = "Format"
+    L["Fishing mode"] = "Angelmodus"
+    L["Use general filters"] = "Allgemeine Filter verwenden"
+    L["Profile maintenance"] = "Profilverwaltung"
+    L["Profile maintenance help"] = "Zurücksetzen stellt die Standardwerte des aktiven Profils wieder her. Löschen entfernt ein anderes gespeichertes Profil. Beide Aktionen erfordern eine Bestätigung."
+    L["Reset profile confirmation"] = "Das aktive Profil auf die Standardeinstellungen zurücksetzen?"
+    L["List add instructions"] = "Zieht einen Gegenstand in das Feld, um ihn hinzuzufügen, oder gebt seinen Namen oder seine ID ein und klickt auf Hinzufügen."
+    L["Loot all status"] = "Alles plündern ist aktiv: Preis und Qualität begrenzen das Plündern nicht. Ausschlussfilter gelten weiterhin."
+    L["Alert empty list help"] = "Keine Warnungen eingerichtet. Fügt oben einen Gegenstand hinzu, um benachrichtigt zu werden, wenn er in der Beute erscheint."
+    L["Fishing mode help"] = "Allgemeine Filter verwenden eure normalen Beuteregeln. Der Erlaubnislistenmodus plündert nur aufgelistete Gegenstände, einschließlich als Fisch markierter Einträge. Deaktiviert die automatische Beute von WoW und andere Beute-Addons, damit AutoLooter die Angelbeute steuern kann."
+    L["Item lists"] = "Gegenstandslisten"
+    L["Price slider help"] = "Mindestwert eines Gegenstands für das automatische Plündern. Schritte von 10 Silber bis zu 20 Gold. Bei 0 ist dieser Filter deaktiviert. Andere aktive Filter können weiterhin günstigere Gegenstände plündern."
+    L["Auctionator option help"] = "Prüft für den Preisfilter auch die verfügbaren Auktionspreise von Auctionator. Plündert einen Gegenstand, wenn sein Händlerwert oder bekannter Auktionspreis den Grenzwert erreicht. Für Auktionspreise wird Auctionator benötigt."
+    L["Ignore BoP option help"] = "Überspringt Gegenstände, die beim Aufheben gebunden werden. Gegenstände auf der Erlaubnisliste haben Vorrang vor diesem Filter."
+    L["Fishing all option help"] = "Plündert die gesamte Angelbeute, sofern kein vorheriger Sperrfilter sie ausschließt. Dieser Modus deaktiviert die anderen Angelmodi."
+    L["Fishing none option help"] = "AutoLooter plündert beim Angeln nichts, auch keine erlaubten Gegenstände. Nützlich mit Fishing Buddy. Die automatische Beute von WoW und andere Addons werden dadurch nicht gestoppt. Dieser Modus deaktiviert die anderen Angelmodi."
+    L["Whitelist empty list help"] = "Hier sind keine Gegenstände anzuzeigen. Zieht einen Gegenstand in das Feld oben oder gebt seinen Namen oder seine ID ein. Als Fisch markierte Gegenstände erscheinen unter Angeln."
+    L["Blacklist empty list help"] = "Keine Gegenstände ausgeschlossen. Zieht einen Gegenstand in das Feld oben oder gebt seinen Namen oder seine ID ein."
+    L["Fishing empty list help"] = "Keine Fische hinzugefügt. Fügt einen Gegenstand zur Erlaubnisliste hinzu und markiert ihn über die Fischschaltfläche daneben als Fisch."
+    L["Item category"] = "Gegenstandskategorie"
+    L["Advanced options"] = "Erweiterte Optionen"
+    L["Hold and drag to move"] = "Zum Verschieben halten und ziehen"
+    L["Ignore BoP"] = "BoP ignorieren"
+    L["Ignore Fishing"] = "Angeln ignorieren"
+    L["Ignore greys when looting by type"] = "Graue Gegenstände beim Plündern nach Typ ignorieren"
+    L["Ignored"] = "Ignoriert"
+    L["Integration"] = "Addon-Anbindung"
+    L["Invalid item"] = "Ungültiger Gegenstand"
+    L["Items list"] = "Gegenstandsliste"
+    L["Mark as fish"] = "Als Fisch markieren"
+    L["Remove fish tag"] = "Fischmarkierung entfernen"
+    L["Left-click"] = "Linksklick"
+    L["Listed"] = "Aufgelistet"
+    L["Load Profile"] = "Profil laden"
+    L["Load profile '${profile}' and reload UI?"] = "Profil \"${profile}\" laden und UI neu laden?"
+    L["Locked"] = "Gesperrt"
+    L["Loot by Price"] = "Beute nach Preis"
+    L["Loot by Rarity"] = "Beute nach Seltenheit"
+    L["Loot everything"] = "Alles plündern"
+    L["Loot everything while Fishing"] = "Beim Angeln alles plündern"
+    L["Loot everything with a price greater or equal to this value"] = "Alles plündern, dessen Preis größer oder gleich diesem Wert ist"
+    L["Loot quest items"] = "Questgegenstände plündern"
+    L["Not listed"] = "Nicht in der Liste"
+    L["Off"] = "Aus"
+    L["On"] = "An"
+    L["Price"] = "Preis"
+    L["Price (in coppers)"] = "Preis (in Kupfer)"
+    L["Print items others receive"] = "Gegenstände anzeigen, die andere erhalten"
+    L["Print items you receive"] = "Gegenstände anzeigen, die du erhältst"
+    L["Printout chat frames"] = "Chatfenster für die Ausgabe"
+    L["Printout commands at login"] = "Befehle beim Login anzeigen"
+    L["Printout items icon only"] = "Nur das Gegenstandssymbol anzeigen"
+    L["Printout items ignored"] = "Ignorierte Gegenstände anzeigen"
+    L["Printout items looted"] = "Geplünderte Gegenstände anzeigen"
+    L["Printout items type"] = "Gegenstandstyp anzeigen"
+    L["Printout reason of loot"] = "Grund für die Beute anzeigen"
+    L["Quest"] = "Questgegenstand"
+    L["Rarity"] = "Seltenheit"
+    L["Received Items"] = "Erhaltene Gegenstände"
+    L["Received items group Delay (ms)"] = "Verzögerung zum Gruppieren erhaltener Gegenstände (ms)"
+    L["Remove all"] = "Alle entfernen"
+    L["Remove item from alert list"] = "Gegenstand aus der Warnliste entfernen"
+    L["Remove item from ignore list"] = "Gegenstand aus der Ausschlussliste entfernen"
+    L["Remove item from white list"] = "Gegenstand aus der Erlaubnisliste entfernen"
+    L["Remove old entries"] = "Alte Einträge entfernen"
+    L["Removed"] = "Entfernt"
+    L["Right-click"] = "Rechtsklick"
+    L["Right-click to show profile menu"] = "Rechtsklick, um das Profilmenü zu öffnen"
+    L["Select all"] = "Alle auswählen"
+    L["Set alert sound"] = "Warnton festlegen"
+    L["Show/Hide minimap button"] = "Minimap-Schaltfläche anzeigen/ausblenden"
+    L["Show/Hide UI"] = "UI anzeigen/ausblenden"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Nützlich, damit Addons wie Fishing Buddy ihre Arbeit machen können"
+    L["This will cleanup and recreate the type database"] = "Dies bereinigt und erstellt die Typdatenbank neu"
+    L["This will remove old types/subtypes entries from the database"] = "Dies entfernt alte Typen/Untertypen aus der Datenbank"
+    L["to Enable/Disable loot all"] = "zum Aktivieren/Deaktivieren von \"Alles plündern\""
+    L["to Show/Hide UI"] = "zum Anzeigen/Ausblenden der UI"
+    L["Token"] = "Abzeichen"
+    L["Try to show loot animation"] = "Versuchen, die Beuteanimation anzuzeigen"
+    L["Type"] = "Typ"
+    L["Whitelist"] = "Erlaubnisliste"
+    L["You"] = "Du"
+    L["You can drag & drop items here!"] = "Du kannst Gegenstände hierher ziehen und ablegen!"
+    L["Chat"] = "Chat"
+    L["Old Entries"] = "Alte Einträge"
+    L["[link/id/name] or [mouse over]"] = "[Link/ID/Name] oder [unter dem Mauszeiger]"
+    L["Addon Language"] = "Addon-Sprache"
+    L["Client Language"] = "Client-Sprache"
+    L["Apply language and reload UI"] = "Sprache anwenden und UI neu laden"
+    L["Addon language help"] = "Wählt die Sprache für AutoLooter. Diese Einstellung gilt für alle Profile und Charaktere. Ladet die Benutzeroberfläche neu, um eine andere Sprache anzuwenden. Gegenstandsnamen und vom Spiel bereitgestellte Texte verwenden weiterhin die Client-Sprache."
+    L["Existing profiles"] = "Vorhandene Profile"
+    L["New profile"] = "Neues Profil"
+    L["Copy from profile"] = "Aus Profil kopieren"
+    L["Reset profile"] = "Profil zurücksetzen"
+    L["Delete profile"] = "Profil löschen"
+    L["Delete profile confirmation"] = "Das ausgewählte Profil löschen?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "itIT")
 if L then
-	L["(Legacy Types)"] = "(Tipi legacy)"
-L["Add item to alert list"] = "Aggiungi oggetto alla Alert List"
-L["Add item to ignore list"] = "Aggiungi oggetto alla ignore list"
-L["Add item to white list"] = "Aggiungi oggetto alla white list"
-L["Added"] = "Aggiunto"
-L["Alert List"] = "Alert List"
-L["All"] = "Tutto"
-L["All items received between this delay will be grouped"] = "Tutti gli oggetti ricevuti entro questo intervallo saranno raggruppati"
-L["Auctionator"] = "Integrazione Auctionator"
-L["Enable Auctionator integration for price checking"] = "Abilita l'integrazione con Auctionator per il controllo dei prezzi"
-L["Already in the list"] = "Già nella lista"
-L["Auto confirm loot roll"] = "Conferma automatica al roll del Loot"
-L["Blacklist"] = "Blacklist"
-L["Close"] = "Chiudi"
-L["Close after loot"] = "Chiudi dopo aver raccolto"
-L["Coin"] = "Moneta"
-L["Disabled"] = "Disabilitato"
-L["Don't loot anything while Fishing"] = "Non raccogliere durante la pesca"
-L["Enable AutoLooter"] = "Abilita AutoLooter"
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter non raccoglierà quando l’opzione di Loot Automatico di WoW è attiva!
-
-Questo ti permette di usare il tasto del Loot automatico per abilitare/disabilitare AutoLooter in base al target.
-
-Puoi configurare queste opzioni in "Menu > Interfaccia > Comandi".]=]
-L["Enabled"] = "Abilitato"
-L["Fast loot"] = "Loot rapido"
-L["Fishing"] = "Pesca"
-L["General"] = "Generale"
-L["Hold and drag to move"] = "Tieni premuto e trascina per spostare"
-L["Ignore BoP"] = "Ignora BoP"
-L["Ignore Fishing"] = "Ignora pesca"
-L["Ignore greys when looting by type"] = "Ignora i grigi durante il Loot per tipo"
-L["Ignored"] = "Ignorato"
-L["Integration"] = "Integrazione"
-L["Invalid item"] = "Oggetto non valido"
-L["Items list"] = "Lista oggetti"
-L["Left-click"] = "Clic sinistro"
-L["Listed"] = "In lista"
-L["Load Profile"] = "Carica profilo"
-L["Load profile '${profile}' and reload UI?"] = "Caricare il profilo '${profile}' e ricaricare l’interfaccia?"
-L["Locked"] = "Bloccato"
-L["Loot by Price"] = "Raccogli per prezzo"
-L["Loot by Rarity"] = "Raccogli per rarità"
-L["Loot everything"] = "Raccogli tutto"
-L["Loot everything while Fishing"] = "Raccogli tutto durante la pesca"
-L["Loot everything with a price greater or equal to this value"] = "Raccogli oggetti con prezzo maggiore o uguale a questo valore"
-L["Loot quest items"] = "Raccogli oggetti di missione"
-L["Not listed"] = "Non in lista"
-L["Off"] = "Off"
-L["On"] = "On"
-L["Price"] = "Prezzo"
-L["Price (in coppers)"] = "Prezzo (in copper)"
-L["Print items others receive"] = "Mostra gli oggetti che ricevono gli altri"
-L["Print items you receive"] = "Mostra gli oggetti che ricevi"
-L["Printout chat frames"] = "Finestre di chat dove sarà mostrato"
-L["Printout commands at login"] = "Mostra comandi all’accesso"
-L["Printout items icon only"] = "Mostra solo l’icona degli oggetti"
-L["Printout items ignored"] = "Mostra oggetti ignorati"
-L["Printout items looted"] = "Mostra oggetti raccolti"
-L["Printout items type"] = "Mostra tipo oggetti"
-L["Printout reason of loot"] = "Mostra il motivo del loot"
-L["Quest"] = "Missione"
-L["Rarity"] = "Rarità"
-L["Received Items"] = "Oggetti ricevuti"
-L["Received items group Delay (ms)"] = "Ritardo raggruppamento oggetti ricevuti (ms)"
-L["Remove all"] = "Rimuovi tutto"
-L["Remove item from alert list"] = "Rimuovi oggetto dalla Alert List"
-L["Remove item from ignore list"] = "Rimuovi oggetto dalla ignore list"
-L["Remove item from white list"] = "Rimuovi oggetto dalla white list"
-L["Remove old entries"] = "Rimuovi voci obsolete"
-L["Removed"] = "Rimosso"
-L["Right-click"] = "Clic destro"
-L["Right-click to show profile menu"] = "Clic destro per mostrare il menu profilo"
-L["Select all"] = "Seleziona tutto"
-L["Set alert sound"] = "Imposta suono di avviso"
-L["Show/Hide minimap button"] = "Mostra/Nascondi pulsante sulla minimappa"
-L["Show/Hide UI"] = "Mostra/Nascondi UI"
-L["This can be useful to let addons like Fishing Buddy do its work"] = "Utile per lasciare che addon come Fishing Buddy facciano il loro lavoro"
-L["This will cleanup and recreate the type database"] = "Questo pulirà e ricreerà il database dei tipi"
-L["This will remove old types/subtypes entries from the database"] = "Questo rimuoverà vecchie voci di tipi/sottotipi dal database"
-L["to Enable/Disable loot all"] = "per Abilitare/Disabilitare il raccogliere tutto"
-L["to Show/Hide UI"] = "per Mostrare/Nascondere la UI"
-L["Token"] = "Gettone"
-L["Try to show loot animation"] = "Prova a mostrare l’animazione di Loot"
-L["Type"] = "Tipo"
-L["Whitelist"] = "Whitelist"
-L["You"] = "Tu"
-L["You can drag & drop items here!"] = "Puoi trascinare e rilasciare gli oggetti qui!"
-
-	return
+    L["(Legacy Types)"] = "(Tipi legacy)"
+    L["Add item to alert list"] = "Aggiungi oggetto alla lista avvisi"
+    L["Add item to ignore list"] = "Aggiungi oggetto alla lista esclusi"
+    L["Add item to white list"] = "Aggiungi oggetto alla lista consentiti"
+    L["Added"] = "Aggiunto"
+    L["Alert List"] = "Lista avvisi"
+    L["All"] = "Tutto"
+    L["All items received between this delay will be grouped"] = "Tutti gli oggetti ricevuti entro questo intervallo saranno raggruppati"
+    L["Already in the list"] = "Già nella lista"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Abilita l'integrazione con Auctionator per il controllo dei prezzi"
+    L["Auto confirm loot roll"] = "Conferma automaticamente i tiri per il bottino"
+    L["Blacklist"] = "Lista esclusi"
+    L["Close"] = "Chiudi"
+    L["Close after loot"] = "Chiudi dopo aver raccolto"
+    L["Coin"] = "Moneta"
+    L["Disabled"] = "Disabilitato"
+    L["Don't loot anything while Fishing"] = "Non raccogliere durante la pesca"
+    L["Loot only whitelisted items while Fishing"] = "Durante la pesca raccogli solo dalla lista consentiti"
+    L["Fishing whitelist mode description"] = "Durante la pesca raccoglie solo gli oggetti nella lista consentiti del profilo attuale, compresi quelli contrassegnati come pesci. Gli altri oggetti vengono esclusi anche se soddisfano le regole generali di rarità, prezzo, tipo o raccolta completa. Con la lista vuota non raccoglie nulla. Disattiva la raccolta automatica di WoW e gli altri addon di raccolta automatica: questa modalità non può impedirne la raccolta."
+    L["Enable AutoLooter"] = "Abilita AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter non raccoglie oggetti mentre la raccolta automatica di WoW li sta raccogliendo.\n\nPuoi usare il tasto della raccolta automatica di WoW per abilitare o disabilitare AutoLooter sul bersaglio attuale.\n\nPuoi configurare queste opzioni in Menu > Interfaccia > Comandi."
+    L["Enabled"] = "Abilitato"
+    L["Fast loot"] = "Raccolta rapida"
+    L["Fishing"] = "Pesca"
+    L["Fishes (added in Whitelist)"] = "Pesci (aggiunti alla lista consentiti)"
+    L["General"] = "Generale"
+    L["Profiles"] = "Profili"
+    L["Profile"] = "Profilo"
+    L["Other options"] = "Altre opzioni"
+    L["Settings"] = "Impostazioni"
+    L["Add"] = "Aggiungi"
+    L["Create"] = "Crea"
+    L["Preview"] = "Ascolta"
+    L["Custom sound"] = "Suono personalizzato"
+    L["Raid warning"] = "Avviso incursione"
+    L["Ready check"] = "Appello"
+    L["Boss warning"] = "Avviso boss"
+    L["Whisper"] = "Sussurro"
+    L["Map ping"] = "Segnale sulla mappa"
+    L["Alarm 1"] = "Allarme 1"
+    L["Alarm 2"] = "Allarme 2"
+    L["Alarm 3"] = "Allarme 3"
+    L["Coins"] = "Monete"
+    L["Fishing reel"] = "Abboccata"
+    L["Clear selection"] = "Deseleziona tutto"
+    L["Destinations"] = "Destinazioni"
+    L["Messages"] = "Messaggi"
+    L["Format"] = "Formato"
+    L["Fishing mode"] = "Modalità di pesca"
+    L["Use general filters"] = "Usa i filtri generali"
+    L["Profile maintenance"] = "Gestione avanzata del profilo"
+    L["Profile maintenance help"] = "Reset ripristina le impostazioni predefinite del profilo attivo. Elimina rimuove un altro profilo salvato. Entrambe le azioni richiedono conferma."
+    L["Reset profile confirmation"] = "Ripristinare le impostazioni predefinite del profilo attivo?"
+    L["List add instructions"] = "Trascina un oggetto nel campo per aggiungerlo oppure inserisci il suo nome o ID e premi Aggiungi."
+    L["Loot all status"] = "Raccogli tutto è attivo: Price e Rarity non limitano la raccolta. I filtri di esclusione restano validi."
+    L["Alert empty list help"] = "Nessun avviso configurato. Aggiungi un oggetto sopra per ricevere un avviso quando compare nel bottino."
+    L["Fishing mode help"] = "I filtri generali applicano le normali regole di raccolta. La modalità lista consentiti raccoglie solo gli oggetti elencati, compresi quelli contrassegnati come pesci. Disattiva la raccolta automatica di WoW e gli altri addon di raccolta automatica per lasciare ad AutoLooter il controllo del bottino della pesca."
+    L["Item lists"] = "Liste oggetti"
+    L["Price slider help"] = "Valore minimo degli oggetti per la raccolta automatica. Incrementi di 10 silver, fino a 20 gold. A 0 questo filtro è disattivato. Gli altri filtri attivi possono comunque raccogliere oggetti di valore inferiore."
+    L["Auctionator option help"] = "Controlla anche i prezzi d'asta disponibili in Auctionator per il filtro Price. Raccoglie un oggetto quando il valore del mercante o il prezzo d'asta noto raggiunge la soglia. I prezzi d'asta richiedono Auctionator."
+    L["Ignore BoP option help"] = "Esclude gli oggetti vincolati alla raccolta. Gli oggetti nella lista consentiti hanno precedenza su questo filtro."
+    L["Fishing all option help"] = "Raccoglie tutto il bottino della pesca, salvo esclusioni dei filtri precedenti. Selezionando questa modalità si disattivano le altre modalità Fishing."
+    L["Fishing none option help"] = "AutoLooter non raccoglie nulla durante la pesca, nemmeno gli oggetti nella lista consentiti. Utile con Fishing Buddy. Non blocca la raccolta automatica di WoW o altri addon. Selezionando questa modalità si disattivano le altre modalità di pesca."
+    L["Whitelist empty list help"] = "Nessun oggetto da mostrare qui. Trascina un oggetto nel campo sopra oppure inserisci il suo nome o ID. Gli oggetti contrassegnati come pesci compaiono in Fishing."
+    L["Blacklist empty list help"] = "Nessun oggetto escluso. Trascina un oggetto nel campo sopra oppure inserisci il suo nome o ID."
+    L["Fishing empty list help"] = "Nessun pesce aggiunto. Aggiungi un oggetto alla lista consentiti, poi usa il pulsante con il pesce accanto per contrassegnarlo come pesce."
+    L["Item category"] = "Categoria oggetto"
+    L["Advanced options"] = "Opzioni avanzate"
+    L["Hold and drag to move"] = "Tieni premuto e trascina per spostare"
+    L["Ignore BoP"] = "Ignora oggetti vincolati alla raccolta"
+    L["Ignore Fishing"] = "Ignora pesca"
+    L["Ignore greys when looting by type"] = "Ignora gli oggetti grigi nella raccolta per tipo"
+    L["Ignored"] = "Ignorato"
+    L["Integration"] = "Integrazione"
+    L["Invalid item"] = "Oggetto non valido"
+    L["Items list"] = "Lista oggetti"
+    L["Mark as fish"] = "Contrassegna come pesce"
+    L["Remove fish tag"] = "Rimuovi contrassegno pesce"
+    L["Left-click"] = "Clic sinistro"
+    L["Listed"] = "In lista"
+    L["Load Profile"] = "Carica profilo"
+    L["Load profile '${profile}' and reload UI?"] = "Caricare il profilo '${profile}' e ricaricare l’interfaccia?"
+    L["Locked"] = "Bloccato"
+    L["Loot by Price"] = "Raccogli per prezzo"
+    L["Loot by Rarity"] = "Raccogli per rarità"
+    L["Loot everything"] = "Raccogli tutto"
+    L["Loot everything while Fishing"] = "Raccogli tutto durante la pesca"
+    L["Loot everything with a price greater or equal to this value"] = "Raccogli oggetti con prezzo maggiore o uguale a questo valore"
+    L["Loot quest items"] = "Raccogli oggetti di missione"
+    L["Not listed"] = "Non in lista"
+    L["Off"] = "Disattivo"
+    L["On"] = "Attivo"
+    L["Price"] = "Prezzo"
+    L["Price (in coppers)"] = "Prezzo (in copper)"
+    L["Print items others receive"] = "Mostra gli oggetti che ricevono gli altri"
+    L["Print items you receive"] = "Mostra gli oggetti che ricevi"
+    L["Printout chat frames"] = "Finestre di chat dove sarà mostrato"
+    L["Printout commands at login"] = "Mostra comandi all’accesso"
+    L["Printout items icon only"] = "Mostra solo l’icona degli oggetti"
+    L["Printout items ignored"] = "Mostra oggetti ignorati"
+    L["Printout items looted"] = "Mostra oggetti raccolti"
+    L["Printout items type"] = "Mostra tipo oggetti"
+    L["Printout reason of loot"] = "Mostra il motivo della raccolta"
+    L["Quest"] = "Missione"
+    L["Rarity"] = "Rarità"
+    L["Received Items"] = "Oggetti ricevuti"
+    L["Received items group Delay (ms)"] = "Ritardo raggruppamento oggetti ricevuti (ms)"
+    L["Remove all"] = "Rimuovi tutto"
+    L["Remove item from alert list"] = "Rimuovi oggetto dalla lista avvisi"
+    L["Remove item from ignore list"] = "Rimuovi oggetto dalla lista esclusi"
+    L["Remove item from white list"] = "Rimuovi oggetto dalla lista consentiti"
+    L["Remove old entries"] = "Rimuovi voci obsolete"
+    L["Removed"] = "Rimosso"
+    L["Right-click"] = "Clic destro"
+    L["Right-click to show profile menu"] = "Clic destro per mostrare il menu profilo"
+    L["Select all"] = "Seleziona tutto"
+    L["Set alert sound"] = "Imposta suono di avviso"
+    L["Show/Hide minimap button"] = "Mostra/Nascondi pulsante sulla minimappa"
+    L["Show/Hide UI"] = "Mostra/Nascondi UI"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Utile per lasciare che addon come Fishing Buddy facciano il loro lavoro"
+    L["This will cleanup and recreate the type database"] = "Questo pulirà e ricreerà il database dei tipi"
+    L["This will remove old types/subtypes entries from the database"] = "Questo rimuoverà vecchie voci di tipi/sottotipi dal database"
+    L["to Enable/Disable loot all"] = "per Abilitare/Disabilitare il raccogliere tutto"
+    L["to Show/Hide UI"] = "per Mostrare/Nascondere la UI"
+    L["Token"] = "Gettone"
+    L["Try to show loot animation"] = "Prova a mostrare l’animazione di raccolta"
+    L["Type"] = "Tipo"
+    L["Whitelist"] = "Lista consentiti"
+    L["You"] = "Tu"
+    L["You can drag & drop items here!"] = "Puoi trascinare e rilasciare gli oggetti qui!"
+    L["Chat"] = "Chat"
+    L["Old Entries"] = "Voci obsolete"
+    L["[link/id/name] or [mouse over]"] = "[collegamento/ID/nome] oppure [sotto il cursore]"
+    L["Addon Language"] = "Lingua dell’addon"
+    L["Client Language"] = "Lingua del client"
+    L["Apply language and reload UI"] = "Applica lingua e ricarica UI"
+    L["Addon language help"] = "Scegli la lingua di AutoLooter. La preferenza è condivisa da tutti i profili e personaggi. Ricarica l’interfaccia per applicare una lingua diversa. I nomi degli oggetti e i testi forniti dal gioco mantengono la lingua del client."
+    L["Existing profiles"] = "Profili esistenti"
+    L["New profile"] = "Nuovo profilo"
+    L["Copy from profile"] = "Copia dal profilo"
+    L["Reset profile"] = "Reimposta profilo"
+    L["Delete profile"] = "Elimina profilo"
+    L["Delete profile confirmation"] = "Eliminare il profilo selezionato?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "esES")
 if L then
-	L["(Legacy Types)"] = "(Tipos heredados)"
-L["Add item to alert list"] = "Añadir objeto a la Alert List"
-L["Add item to ignore list"] = "Añadir objeto a la ignore list"
-L["Add item to white list"] = "Añadir objeto a la white list"
-L["Added"] = "Añadido"
-L["Alert List"] = "Alert List"
-L["All"] = "Todo"
-L["All items received between this delay will be grouped"] = "Todos los objetos recibidos durante este intervalo se agruparán"
-L["Already in the list"] = "Ya está en la lista"
-L["Auto confirm loot roll"] = "Confirmar automáticamente el botín"
-L["Blacklist"] = "Blacklist"
-L["Close"] = "Cerrar"
-L["Close after loot"] = "Cerrar después de saquear"
-L["Coin"] = "Moneda"
-L["Disabled"] = "Desactivado"
-L["Don't loot anything while Fishing"] = "No saquear nada durante la pesca"
-L["Enable AutoLooter"] = "Habilitar AutoLooter"
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter no saqueará nada cuando la opción de Saqueo automático de WoW esté activa.
-
-Esto te permite usar la tecla de Saqueo automático para activar o desactivar AutoLooter según el objetivo.
-
-Puedes configurar estas opciones en « Menú > Interfaz > Controles ».]=]
-L["Enabled"] = "Activado"
-L["Fast loot"] = "Botín rápido"
-L["Fishing"] = "Pesca"
-L["General"] = "General"
-L["Hold and drag to move"] = "Mantén y arrastra para mover"
-L["Ignore BoP"] = "Ignorar BoP"
-L["Ignore Fishing"] = "Ignorar pesca"
-L["Ignore greys when looting by type"] = "Ignorar los grises al saquear por tipo"
-L["Ignored"] = "Ignorado"
-L["Integration"] = "Integración"
-L["Invalid item"] = "Objeto no válido"
-L["Items list"] = "Lista de objetos"
-L["Left-click"] = "Clic izquierdo"
-L["Listed"] = "Listado"
-L["Load Profile"] = "Cargar perfil"
-L["Load profile '${profile}' and reload UI?"] = "¿Cargar el perfil « ${profile} » y recargar la interfaz?"
-L["Locked"] = "Bloqueado"
-L["Loot by Price"] = "Saquear por precio"
-L["Loot by Rarity"] = "Saquear por rareza"
-L["Loot everything"] = "Saqueo todo"
-L["Loot everything while Fishing"] = "Saqueo todo durante la pesca"
-L["Loot everything with a price greater or equal to this value"] = "Saquear todo objeto con precio mayor o igual a este valor"
-L["Loot quest items"] = "Saquear objetos de misión"
-L["Not listed"] = "No listado"
-L["Off"] = "Apagado"
-L["On"] = "Encendido"
-L["Price"] = "Precio"
-L["Price (in coppers)"] = "Precio (en cobres)"
-L["Print items others receive"] = "Mostrar los objetos que reciben otros"
-L["Print items you receive"] = "Mostrar los objetos que recibes"
-L["Printout chat frames"] = "Ventanas de chat para mostrar"
-L["Printout commands at login"] = "Mostrar comandos al iniciar sesión"
-L["Printout items icon only"] = "Mostrar solo el icono de los objetos"
-L["Printout items ignored"] = "Mostrar objetos ignorados"
-L["Printout items looted"] = "Mostrar objetos saqueados"
-L["Printout items type"] = "Mostrar el tipo de objetos"
-L["Printout reason of loot"] = "Mostrar el motivo del botín"
-L["Quest"] = "Misión"
-L["Rarity"] = "Rareza"
-L["Received Items"] = "Objetos recibidos"
-L["Received items group Delay (ms)"] = "Retraso para agrupar objetos recibidos (ms)"
-L["Remove all"] = "Eliminar todo"
-L["Remove item from alert list"] = "Eliminar objeto de la Alert List"
-L["Remove item from ignore list"] = "Eliminar objeto de la ignore list"
-L["Remove item from white list"] = "Eliminar objeto de la white list"
-L["Remove old entries"] = "Eliminar entradas antiguas"
-L["Removed"] = "Eliminado"
-L["Right-click"] = "Clic derecho"
-L["Right-click to show profile menu"] = "Clic derecho para mostrar el menú de perfil"
-L["Select all"] = "Seleccionar todo"
-L["Set alert sound"] = "Configurar sonido de alerta"
-L["Show/Hide minimap button"] = "Mostrar/Ocultar el botón del minimapa"
-L["Show/Hide UI"] = "Mostrar/Ocultar la interfaz"
-L["This can be useful to let addons like Fishing Buddy do its work"] = "Puede ser útil para que addons como Fishing Buddy hagan su trabajo"
-L["This will cleanup and recreate the type database"] = "Esto limpiará y recreará la base de datos de tipos"
-L["This will remove old types/subtypes entries from the database"] = "Esto eliminará las entradas antiguas de tipos/subtipos de la base de datos"
-L["to Enable/Disable loot all"] = "para activar/desactivar ‘saquear todo’"
-L["to Show/Hide UI"] = "para mostrar/ocultar la interfaz"
-L["Token"] = "Ficha"
-L["Try to show loot animation"] = "Intentar mostrar la animación de botín"
-L["Type"] = "Tipo"
-L["Whitelist"] = "Whitelist"
-L["You"] = "Tú"
-L["You can drag & drop items here!"] = "¡Puedes arrastrar y soltar objetos aquí!"
-
-	return
+    L["(Legacy Types)"] = "(Tipos heredados)"
+    L["Add item to alert list"] = "Añadir objeto a la lista de alertas"
+    L["Add item to ignore list"] = "Añadir objeto a la lista de exclusión"
+    L["Add item to white list"] = "Añadir objeto a la lista permitida"
+    L["Added"] = "Añadido"
+    L["Alert List"] = "Lista de alertas"
+    L["All"] = "Todo"
+    L["All items received between this delay will be grouped"] = "Todos los objetos recibidos durante este intervalo se agruparán"
+    L["Already in the list"] = "Ya está en la lista"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Activar la integración con Auctionator para comprobar precios"
+    L["Auto confirm loot roll"] = "Confirmar automáticamente el botín"
+    L["Blacklist"] = "Lista de exclusión"
+    L["Close"] = "Cerrar"
+    L["Close after loot"] = "Cerrar después de saquear"
+    L["Coin"] = "Moneda"
+    L["Disabled"] = "Desactivado"
+    L["Don't loot anything while Fishing"] = "No saquear nada durante la pesca"
+    L["Loot only whitelisted items while Fishing"] = "Recoger solo objetos permitidos mientras pescas"
+    L["Fishing whitelist mode description"] = "Mientras pescas, recoge solo los objetos de la lista permitida del perfil actual, incluidos los marcados como peces. Ignora las reglas generales de rareza, precio, tipo y recoger todo para los demás objetos. Una lista vacía no recoge nada. Desactiva el botín automático de WoW y otros addons de recogida automática; este modo no puede impedir que recojan objetos."
+    L["Enable AutoLooter"] = "Habilitar AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter no saqueará nada cuando la opción de Saqueo automático de WoW esté activa.\n\nEsto te permite usar la tecla de Saqueo automático para activar o desactivar AutoLooter según el objetivo.\n\nPuedes configurar estas opciones en « Menú > Interfaz > Controles »."
+    L["Enabled"] = "Activado"
+    L["Fast loot"] = "Botín rápido"
+    L["Fishing"] = "Pesca"
+    L["Fishes (added in Whitelist)"] = "Peces (añadidos a la lista permitida)"
+    L["General"] = "General"
+    L["Profiles"] = "Perfiles"
+    L["Profile"] = "Perfil"
+    L["Other options"] = "Otras opciones"
+    L["Settings"] = "Ajustes"
+    L["Add"] = "Añadir"
+    L["Create"] = "Crear"
+    L["Preview"] = "Escuchar"
+    L["Custom sound"] = "Sonido personalizado"
+    L["Raid warning"] = "Aviso de banda"
+    L["Ready check"] = "Comprobación de disponibilidad"
+    L["Boss warning"] = "Aviso de jefe"
+    L["Whisper"] = "Susurro"
+    L["Map ping"] = "Señal en el mapa"
+    L["Alarm 1"] = "Alarma 1"
+    L["Alarm 2"] = "Alarma 2"
+    L["Alarm 3"] = "Alarma 3"
+    L["Coins"] = "Monedas"
+    L["Fishing reel"] = "Picada"
+    L["Clear selection"] = "Borrar selección"
+    L["Destinations"] = "Destinos"
+    L["Messages"] = "Mensajes"
+    L["Format"] = "Formato"
+    L["Fishing mode"] = "Modo de pesca"
+    L["Use general filters"] = "Usar filtros generales"
+    L["Profile maintenance"] = "Gestión de perfiles"
+    L["Profile maintenance help"] = "Restablecer recupera los valores predeterminados del perfil activo. Eliminar borra otro perfil guardado. Ambas acciones requieren confirmación."
+    L["Reset profile confirmation"] = "¿Restablecer el perfil activo a sus ajustes predeterminados?"
+    L["List add instructions"] = "Arrastra un objeto al campo para añadirlo, o introduce su nombre o ID y pulsa Añadir."
+    L["Loot all status"] = "Recoger todo está activo: Precio y Rareza no limitan la recogida. Los filtros de exclusión siguen aplicándose."
+    L["Alert empty list help"] = "No hay alertas configuradas. Añade un objeto arriba para recibir un aviso cuando aparezca en el botín."
+    L["Fishing mode help"] = "Los filtros generales usan tus reglas habituales de botín. El modo de lista permitida recoge solo los objetos incluidos, también los marcados como peces. Desactiva el botín automático de WoW y otros addons de recogida automática para que AutoLooter gestione el botín de pesca."
+    L["Item lists"] = "Listas de objetos"
+    L["Price slider help"] = "Valor mínimo de un objeto para recogerlo automáticamente. Incrementos de 10 platas, hasta 20 oros. Con 0, este filtro se desactiva. Otros filtros activos aún pueden recoger objetos más baratos."
+    L["Auctionator option help"] = "También consulta los precios de subasta disponibles en Auctionator para el filtro Precio. Recoge un objeto cuando su valor de venta a un vendedor o su precio de subasta conocido alcanza el umbral. Los precios de subasta requieren Auctionator."
+    L["Ignore BoP option help"] = "Omite los objetos que se ligan al recogerlos. Los objetos de la lista permitida tienen prioridad sobre este filtro."
+    L["Fishing all option help"] = "Recoge todo el botín de pesca, salvo que un filtro de bloqueo anterior lo excluya. Este modo desactiva los demás modos de pesca."
+    L["Fishing none option help"] = "AutoLooter no recoge nada mientras pescas, ni siquiera los objetos permitidos. Útil con Fishing Buddy. No impide el botín automático de WoW ni el de otros addons. Este modo desactiva los demás modos de pesca."
+    L["Whitelist empty list help"] = "No hay objetos que mostrar aquí. Arrastra un objeto al campo superior o introduce su nombre o ID. Los objetos marcados como peces aparecen en Pesca."
+    L["Blacklist empty list help"] = "No hay objetos excluidos. Arrastra un objeto al campo superior o introduce su nombre o ID."
+    L["Fishing empty list help"] = "No hay peces añadidos. Añade un objeto a la lista permitida y utiliza el botón del pez junto a él para marcarlo como pez."
+    L["Item category"] = "Categoría de objeto"
+    L["Advanced options"] = "Opciones avanzadas"
+    L["Hold and drag to move"] = "Mantén y arrastra para mover"
+    L["Ignore BoP"] = "Ignorar BoP"
+    L["Ignore Fishing"] = "Ignorar pesca"
+    L["Ignore greys when looting by type"] = "Ignorar los grises al saquear por tipo"
+    L["Ignored"] = "Ignorado"
+    L["Integration"] = "Integración"
+    L["Invalid item"] = "Objeto no válido"
+    L["Items list"] = "Lista de objetos"
+    L["Mark as fish"] = "Marcar como pez"
+    L["Remove fish tag"] = "Quitar marca de pez"
+    L["Left-click"] = "Clic izquierdo"
+    L["Listed"] = "Listado"
+    L["Load Profile"] = "Cargar perfil"
+    L["Load profile '${profile}' and reload UI?"] = "¿Cargar el perfil « ${profile} » y recargar la interfaz?"
+    L["Locked"] = "Bloqueado"
+    L["Loot by Price"] = "Saquear por precio"
+    L["Loot by Rarity"] = "Saquear por rareza"
+    L["Loot everything"] = "Saqueo todo"
+    L["Loot everything while Fishing"] = "Saqueo todo durante la pesca"
+    L["Loot everything with a price greater or equal to this value"] = "Saquear todo objeto con precio mayor o igual a este valor"
+    L["Loot quest items"] = "Saquear objetos de misión"
+    L["Not listed"] = "No listado"
+    L["Off"] = "Apagado"
+    L["On"] = "Encendido"
+    L["Price"] = "Precio"
+    L["Price (in coppers)"] = "Precio (en cobres)"
+    L["Print items others receive"] = "Mostrar los objetos que reciben otros"
+    L["Print items you receive"] = "Mostrar los objetos que recibes"
+    L["Printout chat frames"] = "Ventanas de chat para mostrar"
+    L["Printout commands at login"] = "Mostrar comandos al iniciar sesión"
+    L["Printout items icon only"] = "Mostrar solo el icono de los objetos"
+    L["Printout items ignored"] = "Mostrar objetos ignorados"
+    L["Printout items looted"] = "Mostrar objetos saqueados"
+    L["Printout items type"] = "Mostrar el tipo de objetos"
+    L["Printout reason of loot"] = "Mostrar el motivo del botín"
+    L["Quest"] = "Misión"
+    L["Rarity"] = "Rareza"
+    L["Received Items"] = "Objetos recibidos"
+    L["Received items group Delay (ms)"] = "Retraso para agrupar objetos recibidos (ms)"
+    L["Remove all"] = "Eliminar todo"
+    L["Remove item from alert list"] = "Eliminar objeto de la lista de alertas"
+    L["Remove item from ignore list"] = "Eliminar objeto de la lista de exclusión"
+    L["Remove item from white list"] = "Eliminar objeto de la lista permitida"
+    L["Remove old entries"] = "Eliminar entradas antiguas"
+    L["Removed"] = "Eliminado"
+    L["Right-click"] = "Clic derecho"
+    L["Right-click to show profile menu"] = "Clic derecho para mostrar el menú de perfil"
+    L["Select all"] = "Seleccionar todo"
+    L["Set alert sound"] = "Configurar sonido de alerta"
+    L["Show/Hide minimap button"] = "Mostrar/Ocultar el botón del minimapa"
+    L["Show/Hide UI"] = "Mostrar/Ocultar la interfaz"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Puede ser útil para que addons como Fishing Buddy hagan su trabajo"
+    L["This will cleanup and recreate the type database"] = "Esto limpiará y recreará la base de datos de tipos"
+    L["This will remove old types/subtypes entries from the database"] = "Esto eliminará las entradas antiguas de tipos/subtipos de la base de datos"
+    L["to Enable/Disable loot all"] = "para activar/desactivar ‘saquear todo’"
+    L["to Show/Hide UI"] = "para mostrar/ocultar la interfaz"
+    L["Token"] = "Ficha"
+    L["Try to show loot animation"] = "Intentar mostrar la animación de botín"
+    L["Type"] = "Tipo"
+    L["Whitelist"] = "Lista permitida"
+    L["You"] = "Tú"
+    L["You can drag & drop items here!"] = "¡Puedes arrastrar y soltar objetos aquí!"
+    L["Chat"] = "Chat"
+    L["Old Entries"] = "Entradas antiguas"
+    L["[link/id/name] or [mouse over]"] = "[enlace/ID/nombre] o [bajo el cursor]"
+    L["Addon Language"] = "Idioma del addon"
+    L["Client Language"] = "Idioma del cliente"
+    L["Apply language and reload UI"] = "Aplicar idioma y recargar interfaz"
+    L["Addon language help"] = "Elige el idioma de AutoLooter. Esta preferencia se comparte entre todos los perfiles y personajes. Recarga la interfaz para aplicar otro idioma. Los nombres de los objetos y los textos del juego siguen usando el idioma del cliente."
+    L["Existing profiles"] = "Perfiles existentes"
+    L["New profile"] = "Nuevo perfil"
+    L["Copy from profile"] = "Copiar del perfil"
+    L["Reset profile"] = "Restablecer perfil"
+    L["Delete profile"] = "Eliminar perfil"
+    L["Delete profile confirmation"] = "¿Eliminar el perfil seleccionado?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "esMX")
 if L then
-	--[[Translation missing --]]
-L["(Legacy Types)"] = "(Legacy Types)"
-L["Add item to alert list"] = "Agregar objeto a la lista de alertas"
-L["Add item to ignore list"] = "Agregar objeto a la lista de ignorados"
-L["Add item to white list"] = "Agregar objeto a la lista blanca"
-L["Added"] = "Agregar"
-L["Alert List"] = "Lista de alertas"
-L["All"] = "Todo"
---[[Translation missing --]]
-L["All items received between this delay will be grouped"] = "All items received between this delay will be grouped"
-L["Already in the list"] = "Ya se encuentra en la lista"
-L["Auto confirm loot roll"] = "Confirmar automáticamente el botín"
-L["Blacklist"] = "Lista Negra"
-L["Close"] = "Cerrar"
-L["Close after loot"] = "Cerrar después del botín"
---[[Translation missing --]]
-L["Coin"] = "Coin"
-L["Disabled"] = "Deshabilitado"
---[[Translation missing --]]
-L["Don't loot anything while Fishing"] = "Don't loot anything while Fishing"
-L["Enable AutoLooter"] = "Habilitar AutoLooter"
---[[Translation missing --]]
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter will not loot anything when WoWs AutoLoot option is looting!
-
-This allows you to use the WoWs AutoLoot key as way to enable/disable AutoLooter by target.
-
-You can configure this options in 'Menu > Interface > Controls'.]=]
-L["Enabled"] = "Habilitado"
---[[Translation missing --]]
-L["Fast loot"] = "Fast loot"
---[[Translation missing --]]
-L["Fishing"] = "Fishing"
-L["General"] = "General"
-L["Hold and drag to move"] = "Sostenga y arrastre para mover"
---[[Translation missing --]]
-L["Ignore BoP"] = "Ignore BoP"
---[[Translation missing --]]
-L["Ignore Fishing"] = "Ignore Fishing"
---[[Translation missing --]]
-L["Ignore greys when looting by type"] = "Ignore greys when looting by type"
-L["Ignored"] = "Ignorar"
---[[Translation missing --]]
-L["Integration"] = "Integration"
-L["Invalid item"] = "Objeto Invalido"
-L["Items list"] = "Lista de objetos"
-L["Left-click"] = "Click izquierdo"
-L["Listed"] = "Listado"
---[[Translation missing --]]
-L["Load Profile"] = "Load Profile"
---[[Translation missing --]]
-L["Load profile '${profile}' and reload UI?"] = "Load profile '${profile}' and reload UI?"
-L["Locked"] = "Cerrado"
-L["Loot by Price"] = "Recolectar por precio"
-L["Loot by Rarity"] = "Recolectar por rareza"
-L["Loot everything"] = "Recolectar todo"
---[[Translation missing --]]
-L["Loot everything while Fishing"] = "Loot everything while Fishing"
---[[Translation missing --]]
-L["Loot everything with a price greater or equal to this value"] = "Loot everything with a price greater or equal to this value"
-L["Loot quest items"] = "Recolectar objetos de misión"
-L["Not listed"] = "No enlistado"
-L["Off"] = "Apagar"
-L["On"] = "Encender"
-L["Price"] = "Precio"
---[[Translation missing --]]
-L["Price (in coppers)"] = "Price (in coppers)"
---[[Translation missing --]]
-L["Print items others receive"] = "Print items others receive"
---[[Translation missing --]]
-L["Print items you receive"] = "Print items you receive"
---[[Translation missing --]]
-L["Printout chat frames"] = "Printout chat frames"
---[[Translation missing --]]
-L["Printout commands at login"] = "Printout commands at login"
---[[Translation missing --]]
-L["Printout items icon only"] = "Printout items icon only"
---[[Translation missing --]]
-L["Printout items ignored"] = "Printout items ignored"
---[[Translation missing --]]
-L["Printout items looted"] = "Printout items looted"
---[[Translation missing --]]
-L["Printout items type"] = "Printout items type"
---[[Translation missing --]]
-L["Printout reason of loot"] = "Printout reason of loot"
---[[Translation missing --]]
-L["Quest"] = "Quest"
---[[Translation missing --]]
-L["Rarity"] = "Rarity"
---[[Translation missing --]]
-L["Received Items"] = "Received Items"
---[[Translation missing --]]
-L["Received items group Delay (ms)"] = "Received items group Delay (ms)"
---[[Translation missing --]]
-L["Remove all"] = "Remove all"
---[[Translation missing --]]
-L["Remove item from alert list"] = "Remove item from alert list"
---[[Translation missing --]]
-L["Remove item from ignore list"] = "Remove item from ignore list"
---[[Translation missing --]]
-L["Remove item from white list"] = "Remove item from white list"
---[[Translation missing --]]
-L["Remove old entries"] = "Remove old entries"
---[[Translation missing --]]
-L["Removed"] = "Removed"
---[[Translation missing --]]
-L["Right-click"] = "Right-click"
---[[Translation missing --]]
-L["Right-click to show profile menu"] = "Right-click to show profile menu"
---[[Translation missing --]]
-L["Select all"] = "Select all"
---[[Translation missing --]]
-L["Set alert sound"] = "Set alert sound"
---[[Translation missing --]]
-L["Show/Hide minimap button"] = "Show/Hide minimap button"
---[[Translation missing --]]
-L["Show/Hide UI"] = "Show/Hide UI"
---[[Translation missing --]]
-L["This can be useful to let addons like Fishing Buddy do its work"] = "This can be useful to let addons like Fishing Buddy do its work"
---[[Translation missing --]]
-L["This will cleanup and recreate the type database"] = "This will cleanup and recreate the type database"
---[[Translation missing --]]
-L["This will remove old types/subtypes entries from the database"] = "This will remove old types/subtypes entries from the database"
---[[Translation missing --]]
-L["to Enable/Disable loot all"] = "to Enable/Disable loot all"
---[[Translation missing --]]
-L["to Show/Hide UI"] = "to Show/Hide UI"
---[[Translation missing --]]
-L["Token"] = "Token"
---[[Translation missing --]]
-L["Try to show loot animation"] = "Try to show loot animation"
---[[Translation missing --]]
-L["Type"] = "Type"
---[[Translation missing --]]
-L["Whitelist"] = "Whitelist"
---[[Translation missing --]]
-L["You"] = "You"
---[[Translation missing --]]
-L["You can drag & drop items here!"] = "You can drag & drop items here!"
-
-	return
+    L["(Legacy Types)"] = "(Tipos heredados)"
+    L["Add item to alert list"] = "Agregar objeto a la lista de alertas"
+    L["Add item to ignore list"] = "Agregar objeto a la lista de ignorados"
+    L["Add item to white list"] = "Agregar objeto a la lista blanca"
+    L["Added"] = "Agregar"
+    L["Alert List"] = "Lista de alertas"
+    L["All"] = "Todo"
+    L["All items received between this delay will be grouped"] = "Todos los objetos recibidos durante este intervalo se agruparán"
+    L["Already in the list"] = "Ya se encuentra en la lista"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Activar la integración con Auctionator para comprobar precios"
+    L["Auto confirm loot roll"] = "Confirmar automáticamente el botín"
+    L["Blacklist"] = "Lista Negra"
+    L["Close"] = "Cerrar"
+    L["Close after loot"] = "Cerrar después del botín"
+    L["Coin"] = "Moneda"
+    L["Disabled"] = "Deshabilitado"
+    L["Don't loot anything while Fishing"] = "No saquear nada durante la pesca"
+    L["Loot only whitelisted items while Fishing"] = "Recoger solo objetos permitidos mientras pescas"
+    L["Fishing whitelist mode description"] = "Mientras pescas, recoge solo los objetos de la lista permitida del perfil actual, incluidos los marcados como peces. Ignora las reglas generales de rareza, precio, tipo y recoger todo para los demás objetos. Una lista vacía no recoge nada. Desactiva el botín automático de WoW y otros addons de recogida automática; este modo no puede impedir que recojan objetos."
+    L["Enable AutoLooter"] = "Habilitar AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter no saqueará nada cuando la opción de Saqueo automático de WoW esté activa.\n\nEsto te permite usar la tecla de Saqueo automático para activar o desactivar AutoLooter según el objetivo.\n\nPuedes configurar estas opciones en « Menú > Interfaz > Controles »."
+    L["Enabled"] = "Habilitado"
+    L["Fast loot"] = "Botín rápido"
+    L["Fishing"] = "Pesca"
+    L["Fishes (added in Whitelist)"] = "Peces (agregados a la lista permitida)"
+    L["General"] = "General"
+    L["Profiles"] = "Perfiles"
+    L["Profile"] = "Perfil"
+    L["Other options"] = "Otras opciones"
+    L["Settings"] = "Configuración"
+    L["Add"] = "Agregar"
+    L["Create"] = "Crear"
+    L["Preview"] = "Escuchar"
+    L["Custom sound"] = "Sonido personalizado"
+    L["Raid warning"] = "Aviso de banda"
+    L["Ready check"] = "Comprobación de disponibilidad"
+    L["Boss warning"] = "Aviso de jefe"
+    L["Whisper"] = "Susurro"
+    L["Map ping"] = "Señal en el mapa"
+    L["Alarm 1"] = "Alarma 1"
+    L["Alarm 2"] = "Alarma 2"
+    L["Alarm 3"] = "Alarma 3"
+    L["Coins"] = "Monedas"
+    L["Fishing reel"] = "Picada"
+    L["Clear selection"] = "Borrar selección"
+    L["Destinations"] = "Destinos"
+    L["Messages"] = "Mensajes"
+    L["Format"] = "Formato"
+    L["Fishing mode"] = "Modo de pesca"
+    L["Use general filters"] = "Usar filtros generales"
+    L["Profile maintenance"] = "Gestión de perfiles"
+    L["Profile maintenance help"] = "Restablecer recupera los valores predeterminados del perfil activo. Eliminar borra otro perfil guardado. Ambas acciones requieren confirmación."
+    L["Reset profile confirmation"] = "¿Restablecer el perfil activo a sus configuración predeterminados?"
+    L["List add instructions"] = "Arrastra un objeto al campo para agregarlo, o introduce su nombre o ID y pulsa Agregar."
+    L["Loot all status"] = "Recoger todo está activo: Precio y Rareza no limitan la recogida. Los filtros de exclusión siguen aplicándose."
+    L["Alert empty list help"] = "No hay alertas configuradas. Agrega un objeto arriba para recibir un aviso cuando aparezca en el botín."
+    L["Fishing mode help"] = "Los filtros generales usan tus reglas habituales de botín. El modo de lista permitida recoge solo los objetos incluidos, también los marcados como peces. Desactiva el botín automático de WoW y otros addons de recogida automática para que AutoLooter gestione el botín de pesca."
+    L["Item lists"] = "Listas de objetos"
+    L["Price slider help"] = "Valor mínimo de un objeto para recogerlo automáticamente. Incrementos de 10 platas, hasta 20 oros. Con 0, este filtro se desactiva. Otros filtros activos aún pueden recoger objetos más baratos."
+    L["Auctionator option help"] = "También consulta los precios de subasta disponibles en Auctionator para el filtro Precio. Recoge un objeto cuando su valor de venta a un vendedor o su precio de subasta conocido alcanza el umbral. Los precios de subasta requieren Auctionator."
+    L["Ignore BoP option help"] = "Omite los objetos que se ligan al recogerlos. Los objetos de la lista permitida tienen prioridad sobre este filtro."
+    L["Fishing all option help"] = "Recoge todo el botín de pesca, salvo que un filtro de bloqueo anterior lo excluya. Este modo desactiva los demás modos de pesca."
+    L["Fishing none option help"] = "AutoLooter no recoge nada mientras pescas, ni siquiera los objetos permitidos. Útil con Fishing Buddy. No impide el botín automático de WoW ni el de otros addons. Este modo desactiva los demás modos de pesca."
+    L["Whitelist empty list help"] = "No hay objetos que mostrar aquí. Arrastra un objeto al campo superior o introduce su nombre o ID. Los objetos marcados como peces aparecen en Pesca."
+    L["Blacklist empty list help"] = "No hay objetos excluidos. Arrastra un objeto al campo superior o introduce su nombre o ID."
+    L["Fishing empty list help"] = "No hay peces agregados. Agrega un objeto a la lista permitida y utiliza el botón del pez junto a él para marcarlo como pez."
+    L["Item category"] = "Categoría de objeto"
+    L["Advanced options"] = "Opciones avanzadas"
+    L["Hold and drag to move"] = "Sostenga y arrastre para mover"
+    L["Ignore BoP"] = "Ignorar BoP"
+    L["Ignore Fishing"] = "Ignorar pesca"
+    L["Ignore greys when looting by type"] = "Ignorar los grises al saquear por tipo"
+    L["Ignored"] = "Ignorar"
+    L["Integration"] = "Integración"
+    L["Invalid item"] = "Objeto Invalido"
+    L["Items list"] = "Lista de objetos"
+    L["Mark as fish"] = "Marcar como pez"
+    L["Remove fish tag"] = "Quitar marca de pez"
+    L["Left-click"] = "Click izquierdo"
+    L["Listed"] = "Listado"
+    L["Load Profile"] = "Cargar perfil"
+    L["Load profile '${profile}' and reload UI?"] = "¿Cargar el perfil « ${profile} » y recargar la interfaz?"
+    L["Locked"] = "Cerrado"
+    L["Loot by Price"] = "Recolectar por precio"
+    L["Loot by Rarity"] = "Recolectar por rareza"
+    L["Loot everything"] = "Recolectar todo"
+    L["Loot everything while Fishing"] = "Saqueo todo durante la pesca"
+    L["Loot everything with a price greater or equal to this value"] = "Saquear todo objeto con precio mayor o igual a este valor"
+    L["Loot quest items"] = "Recolectar objetos de misión"
+    L["Not listed"] = "No enlistado"
+    L["Off"] = "Apagar"
+    L["On"] = "Encender"
+    L["Price"] = "Precio"
+    L["Price (in coppers)"] = "Precio (en cobres)"
+    L["Print items others receive"] = "Mostrar los objetos que reciben otros"
+    L["Print items you receive"] = "Mostrar los objetos que recibes"
+    L["Printout chat frames"] = "Ventanas de chat para mostrar"
+    L["Printout commands at login"] = "Mostrar comandos al iniciar sesión"
+    L["Printout items icon only"] = "Mostrar solo el icono de los objetos"
+    L["Printout items ignored"] = "Mostrar objetos ignorados"
+    L["Printout items looted"] = "Mostrar objetos saqueados"
+    L["Printout items type"] = "Mostrar el tipo de objetos"
+    L["Printout reason of loot"] = "Mostrar el motivo del botín"
+    L["Quest"] = "Misión"
+    L["Rarity"] = "Rareza"
+    L["Received Items"] = "Objetos recibidos"
+    L["Received items group Delay (ms)"] = "Retraso para agrupar objetos recibidos (ms)"
+    L["Remove all"] = "Eliminar todo"
+    L["Remove item from alert list"] = "Eliminar objeto de la lista de alertas"
+    L["Remove item from ignore list"] = "Eliminar objeto de la lista de exclusión"
+    L["Remove item from white list"] = "Eliminar objeto de la lista permitida"
+    L["Remove old entries"] = "Eliminar entradas antiguas"
+    L["Removed"] = "Eliminado"
+    L["Right-click"] = "Clic derecho"
+    L["Right-click to show profile menu"] = "Clic derecho para mostrar el menú de perfil"
+    L["Select all"] = "Seleccionar todo"
+    L["Set alert sound"] = "Configurar sonido de alerta"
+    L["Show/Hide minimap button"] = "Mostrar/Ocultar el botón del minimapa"
+    L["Show/Hide UI"] = "Mostrar/Ocultar la interfaz"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Puede ser útil para que addons como Fishing Buddy hagan su trabajo"
+    L["This will cleanup and recreate the type database"] = "Esto limpiará y recreará la base de datos de tipos"
+    L["This will remove old types/subtypes entries from the database"] = "Esto eliminará las entradas antiguas de tipos/subtipos de la base de datos"
+    L["to Enable/Disable loot all"] = "para activar/desactivar ‘saquear todo’"
+    L["to Show/Hide UI"] = "para mostrar/ocultar la interfaz"
+    L["Token"] = "Ficha"
+    L["Try to show loot animation"] = "Intentar mostrar la animación de botín"
+    L["Type"] = "Tipo"
+    L["Whitelist"] = "Lista permitida"
+    L["You"] = "Tú"
+    L["You can drag & drop items here!"] = "¡Puedes arrastrar y soltar objetos aquí!"
+    L["Chat"] = "Chat"
+    L["Old Entries"] = "Entradas antiguas"
+    L["[link/id/name] or [mouse over]"] = "[enlace/ID/nombre] o [bajo el cursor]"
+    L["Addon Language"] = "Idioma del addon"
+    L["Client Language"] = "Idioma del cliente"
+    L["Apply language and reload UI"] = "Aplicar idioma y recargar interfaz"
+    L["Addon language help"] = "Elige el idioma de AutoLooter. Esta preferencia se comparte entre todos los perfiles y personajes. Recarga la interfaz para aplicar otro idioma. Los nombres de los objetos y los textos del juego siguen usando el idioma del cliente."
+    L["Existing profiles"] = "Perfiles existentes"
+    L["New profile"] = "Nuevo perfil"
+    L["Copy from profile"] = "Copiar del perfil"
+    L["Reset profile"] = "Restablecer perfil"
+    L["Delete profile"] = "Eliminar perfil"
+    L["Delete profile confirmation"] = "¿Eliminar el perfil seleccionado?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "ruRU")
 if L then
-	L["(Legacy Types)"] = "(Устаревшие типы)"
-L["Add item to alert list"] = "Добавить предмет в список уведомлений"
-L["Add item to ignore list"] = "Добавить предмет в черный список"
-L["Add item to white list"] = "Добавить предмет в белый список"
-L["Added"] = "Добавлено"
-L["Alert List"] = "Список уведомлений"
-L["All"] = "Всё"
-L["All items received between this delay will be grouped"] = "Все полученные за указанный период предметы будут сгруппированы"
-L["Already in the list"] = "Уже в списке"
-L["Auto confirm loot roll"] = "Автоподтверждение ролла"
-L["Blacklist"] = "Черный список"
-L["Close"] = "Закрыть"
-L["Close after loot"] = "Закрыть после сбора"
-L["Coin"] = "Деньги"
-L["Disabled"] = "Отключено"
-L["Don't loot anything while Fishing"] = "Не собирать во время рыбалки"
-L["Enable AutoLooter"] = "Включить AutoLooter"
-L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter не будет ничего собирать, если WoW собирает своей встроенной функцией! Это позволяет использовать клавишу автосбора как способ включения/выключения AutoLooter от цели к цели. Эти настройки можно изменить в \"Меню\" -> \"Интерфейс\" -> \"Управление\"."
-L["Enabled"] = "Включено"
-L["Fast loot"] = "Быстрый сбор"
-L["Fishing"] = "Рыбалка"
-L["General"] = "Общие настройки"
-L["Hold and drag to move"] = "Удерживай и тащи, чтобы перемещать"
-L["Ignore BoP"] = "Игнорировать BoP"
-L["Ignore Fishing"] = "Игнорировать рыбалку"
-L["Ignore greys when looting by type"] = "Игнорировать мусор при сборе по типу"
-L["Ignored"] = "Игнорируется"
-L["Integration"] = "Интеграция"
-L["Invalid item"] = "Неверный предмет"
-L["Items list"] = "Список предметов"
-L["Left-click"] = "Левый щелчок"
-L["Listed"] = "Внесено в список"
-L["Load Profile"] = "Загрузить профиль"
-L["Load profile '${profile}' and reload UI?"] = "Загрузить профиль '${profile}' и перезагрузить интерфейс?"
-L["Locked"] = "Заблокировано"
-L["Loot by Price"] = "Сбор по цене"
-L["Loot by Rarity"] = "Сбор по редкости"
-L["Loot everything"] = "Собирать всё"
-L["Loot everything while Fishing"] = "Собирать всё во время рыбалки"
-L["Loot everything with a price greater or equal to this value"] = "Собирать всё, что дороже указанной стоимости"
-L["Loot quest items"] = "Собирать квестовые предметы"
-L["Not listed"] = "Не внесено в список"
-L["Off"] = "Выключено"
-L["On"] = "Включено"
-L["Price"] = "Цена"
-L["Price (in coppers)"] = "Цена (в медных монетах)"
-L["Print items others receive"] = "Выводить предметы, которые собирают другие"
-L["Print items you receive"] = "Выводить предметы, которые собираете вы."
-L["Printout chat frames"] = "Окна чата для отображения"
-L["Printout commands at login"] = "Выводить команды при входе"
-L["Printout items icon only"] = "Показывать только иконку предмета"
-L["Printout items ignored"] = "Показывать проигнорированные предметы"
-L["Printout items looted"] = "Показывать собранные предметы"
-L["Printout items type"] = "Показывать тип предметов"
-L["Printout reason of loot"] = "Показывать причину сбора"
-L["Quest"] = "Квестовые"
-L["Rarity"] = "Редкость"
-L["Received Items"] = "Полученные предметы"
-L["Received items group Delay (ms)"] = "Задержка для предметов, полученных группой (мс)"
-L["Remove all"] = "Удалить всё"
-L["Remove item from alert list"] = "Удалить предмет из списка уведомлений"
-L["Remove item from ignore list"] = "Удалить предмет из черного списка"
-L["Remove item from white list"] = "Удалить предмет из белого списка"
-L["Remove old entries"] = "Удалить старые данные"
-L["Removed"] = "Удалено"
-L["Right-click"] = "Правый щелчок"
-L["Right-click to show profile menu"] = "ПКМ чтобы показать меню профиля"
-L["Select all"] = "Выбрать всё"
-L["Set alert sound"] = "Выбрать звук уведомления"
-L["Show/Hide minimap button"] = "Показать/скрыть иконку у миникарты"
-L["Show/Hide UI"] = "Показать/скрыть интерфейс"
-L["This can be useful to let addons like Fishing Buddy do its work"] = "Может быть полезно для Fishing Buddy и подобных дополнений."
-L["This will cleanup and recreate the type database"] = "Это очистит и пересоздаст базу данных."
-L["This will remove old types/subtypes entries from the database"] = "Это удалит старые типы/подтипы из базы данных."
-L["to Enable/Disable loot all"] = ": включить/выключить сбор всего"
-L["to Show/Hide UI"] = ": скрыть/показать интерфейс"
-L["Token"] = "Токен"
-L["Try to show loot animation"] = "Показывать анимацию сбора"
-L["Type"] = "Тип"
-L["Whitelist"] = "Whitelist"
-L["You"] = "Вы"
-L["You can drag & drop items here!"] = "Сюда можно перетаскивать предметы!"
-
-	return
+    L["(Legacy Types)"] = "(Устаревшие типы)"
+    L["Add item to alert list"] = "Добавить предмет в список уведомлений"
+    L["Add item to ignore list"] = "Добавить предмет в черный список"
+    L["Add item to white list"] = "Добавить предмет в список разрешённых"
+    L["Added"] = "Добавлено"
+    L["Alert List"] = "Список уведомлений"
+    L["All"] = "Всё"
+    L["All items received between this delay will be grouped"] = "Все полученные за указанный период предметы будут сгруппированы"
+    L["Already in the list"] = "Уже в списке"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "Включить интеграцию с Auctionator для проверки цен"
+    L["Auto confirm loot roll"] = "Автоподтверждение ролла"
+    L["Blacklist"] = "Черный список"
+    L["Close"] = "Закрыть"
+    L["Close after loot"] = "Закрыть после сбора"
+    L["Coin"] = "Деньги"
+    L["Disabled"] = "Отключено"
+    L["Don't loot anything while Fishing"] = "Не собирать во время рыбалки"
+    L["Loot only whitelisted items while Fishing"] = "Во время рыбалки собирать только разрешённые предметы"
+    L["Fishing whitelist mode description"] = "Во время рыбалки собираются только предметы из списка разрешённых текущего профиля, включая помеченные как рыба. Для остальных предметов игнорируются общие правила качества, цены, типа и сбора всей добычи. Пустой список не позволяет собирать ничего. Отключите автоматический сбор добычи WoW и другие аддоны для автосбора: этот режим не может помешать им собирать предметы."
+    L["Enable AutoLooter"] = "Включить AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "AutoLooter не собирает предметы, пока автоматический сбор добычи WoW собирает их.\n\nКлавиша автоматического сбора добычи WoW позволяет включать или отключать AutoLooter для текущей цели.\n\nНастроить это можно в меню > Интерфейс > Управление."
+    L["Enabled"] = "Включено"
+    L["Fast loot"] = "Быстрый сбор"
+    L["Fishing"] = "Рыбалка"
+    L["Fishes (added in Whitelist)"] = "Рыба (добавленная в список разрешённых)"
+    L["General"] = "Общие настройки"
+    L["Profiles"] = "Профили"
+    L["Profile"] = "Профиль"
+    L["Other options"] = "Другие настройки"
+    L["Settings"] = "Настройки"
+    L["Add"] = "Добавить"
+    L["Create"] = "Создать"
+    L["Preview"] = "Прослушать"
+    L["Custom sound"] = "Пользовательский звук"
+    L["Raid warning"] = "Объявление рейду"
+    L["Ready check"] = "Проверка готовности"
+    L["Boss warning"] = "Предупреждение о боссе"
+    L["Whisper"] = "Шёпот"
+    L["Map ping"] = "Сигнал на карте"
+    L["Alarm 1"] = "Будильник 1"
+    L["Alarm 2"] = "Будильник 2"
+    L["Alarm 3"] = "Будильник 3"
+    L["Coins"] = "Монеты"
+    L["Fishing reel"] = "Поклёвка"
+    L["Clear selection"] = "Снять выделение"
+    L["Destinations"] = "Каналы вывода"
+    L["Messages"] = "Сообщения"
+    L["Format"] = "Формат"
+    L["Fishing mode"] = "Режим рыбалки"
+    L["Use general filters"] = "Использовать общие фильтры"
+    L["Profile maintenance"] = "Управление профилями"
+    L["Profile maintenance help"] = "Сброс восстанавливает настройки активного профиля по умолчанию. Удаление удаляет другой сохранённый профиль. Оба действия требуют подтверждения."
+    L["Reset profile confirmation"] = "Восстановить настройки активного профиля по умолчанию?"
+    L["List add instructions"] = "Перетащите предмет в поле для добавления или введите его название либо ID и нажмите «Добавить»."
+    L["Loot all status"] = "Сбор всей добычи включён: цена и качество не ограничивают сбор. Фильтры исключения продолжают действовать."
+    L["Alert empty list help"] = "Оповещения не настроены. Добавьте предмет выше, чтобы получать уведомление при его появлении в добыче."
+    L["Fishing mode help"] = "Общие фильтры используют обычные правила сбора добычи. Режим списка разрешённых собирает только перечисленные предметы, включая помеченные как рыба. Отключите автоматический сбор добычи WoW и другие аддоны для автосбора, чтобы AutoLooter управлял добычей во время рыбалки."
+    L["Item lists"] = "Списки предметов"
+    L["Price slider help"] = "Минимальная стоимость предмета для автоматического сбора. Шаг 10 серебряных, максимум 20 золотых. При 0 фильтр отключён. Другие включённые фильтры могут собирать более дешёвые предметы."
+    L["Auctionator option help"] = "Также проверяет доступные цены аукциона Auctionator для фильтра цены. Собирает предмет, если его стоимость у торговца или известная цена аукциона достигает порога. Для цен аукциона требуется Auctionator."
+    L["Ignore BoP option help"] = "Пропускает предметы, становящиеся персональными при получении. Предметы из списка разрешённых имеют приоритет над этим фильтром."
+    L["Fishing all option help"] = "Собирает всю добычу рыбалки, если её не исключает более ранний блокирующий фильтр. Этот режим отключает остальные режимы рыбалки."
+    L["Fishing none option help"] = "AutoLooter ничего не собирает во время рыбалки, даже разрешённые предметы. Полезно с Fishing Buddy. Это не останавливает автосбор WoW или другие аддоны. Этот режим отключает остальные режимы рыбалки."
+    L["Whitelist empty list help"] = "Нет предметов для отображения. Перетащите предмет в поле выше или введите его название либо ID. Предметы, помеченные как рыба, отображаются в разделе «Рыбалка»."
+    L["Blacklist empty list help"] = "Нет исключённых предметов. Перетащите предмет в поле выше или введите его название либо ID."
+    L["Fishing empty list help"] = "Рыба не добавлена. Добавьте предмет в список разрешённых и пометьте его как рыбу кнопкой с рыбой рядом с ним."
+    L["Item category"] = "Категория предмета"
+    L["Advanced options"] = "Дополнительные настройки"
+    L["Hold and drag to move"] = "Удерживай и тащи, чтобы перемещать"
+    L["Ignore BoP"] = "Игнорировать BoP"
+    L["Ignore Fishing"] = "Игнорировать рыбалку"
+    L["Ignore greys when looting by type"] = "Игнорировать мусор при сборе по типу"
+    L["Ignored"] = "Игнорируется"
+    L["Integration"] = "Интеграция"
+    L["Invalid item"] = "Неверный предмет"
+    L["Items list"] = "Список предметов"
+    L["Mark as fish"] = "Пометить как рыбу"
+    L["Remove fish tag"] = "Снять пометку рыбы"
+    L["Left-click"] = "Левый щелчок"
+    L["Listed"] = "Внесено в список"
+    L["Load Profile"] = "Загрузить профиль"
+    L["Load profile '${profile}' and reload UI?"] = "Загрузить профиль '${profile}' и перезагрузить интерфейс?"
+    L["Locked"] = "Заблокировано"
+    L["Loot by Price"] = "Сбор по цене"
+    L["Loot by Rarity"] = "Сбор по редкости"
+    L["Loot everything"] = "Собирать всё"
+    L["Loot everything while Fishing"] = "Собирать всё во время рыбалки"
+    L["Loot everything with a price greater or equal to this value"] = "Собирать всё, что дороже указанной стоимости"
+    L["Loot quest items"] = "Собирать квестовые предметы"
+    L["Not listed"] = "Не внесено в список"
+    L["Off"] = "Выключено"
+    L["On"] = "Включено"
+    L["Price"] = "Цена"
+    L["Price (in coppers)"] = "Цена (в медных монетах)"
+    L["Print items others receive"] = "Выводить предметы, которые собирают другие"
+    L["Print items you receive"] = "Выводить предметы, которые собираете вы."
+    L["Printout chat frames"] = "Окна чата для отображения"
+    L["Printout commands at login"] = "Выводить команды при входе"
+    L["Printout items icon only"] = "Показывать только иконку предмета"
+    L["Printout items ignored"] = "Показывать проигнорированные предметы"
+    L["Printout items looted"] = "Показывать собранные предметы"
+    L["Printout items type"] = "Показывать тип предметов"
+    L["Printout reason of loot"] = "Показывать причину сбора"
+    L["Quest"] = "Квестовые"
+    L["Rarity"] = "Редкость"
+    L["Received Items"] = "Полученные предметы"
+    L["Received items group Delay (ms)"] = "Задержка для предметов, полученных группой (мс)"
+    L["Remove all"] = "Удалить всё"
+    L["Remove item from alert list"] = "Удалить предмет из списка уведомлений"
+    L["Remove item from ignore list"] = "Удалить предмет из черного списка"
+    L["Remove item from white list"] = "Удалить предмет из списка разрешённых"
+    L["Remove old entries"] = "Удалить старые данные"
+    L["Removed"] = "Удалено"
+    L["Right-click"] = "Правый щелчок"
+    L["Right-click to show profile menu"] = "ПКМ чтобы показать меню профиля"
+    L["Select all"] = "Выбрать всё"
+    L["Set alert sound"] = "Выбрать звук уведомления"
+    L["Show/Hide minimap button"] = "Показать/скрыть иконку у миникарты"
+    L["Show/Hide UI"] = "Показать/скрыть интерфейс"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Может быть полезно для Fishing Buddy и подобных дополнений."
+    L["This will cleanup and recreate the type database"] = "Это очистит и пересоздаст базу данных."
+    L["This will remove old types/subtypes entries from the database"] = "Это удалит старые типы/подтипы из базы данных."
+    L["to Enable/Disable loot all"] = ": включить/выключить сбор всего"
+    L["to Show/Hide UI"] = ": скрыть/показать интерфейс"
+    L["Token"] = "Токен"
+    L["Try to show loot animation"] = "Показывать анимацию сбора"
+    L["Type"] = "Тип"
+    L["Whitelist"] = "Список разрешённых"
+    L["You"] = "Вы"
+    L["You can drag & drop items here!"] = "Сюда можно перетаскивать предметы!"
+    L["Chat"] = "Чат"
+    L["Old Entries"] = "Устаревшие записи"
+    L["[link/id/name] or [mouse over]"] = "[ссылка/ID/название] или [под курсором]"
+    L["Addon Language"] = "Язык аддона"
+    L["Client Language"] = "Язык клиента"
+    L["Apply language and reload UI"] = "Применить язык и перезагрузить интерфейс"
+    L["Addon language help"] = "Выберите язык AutoLooter. Настройка общая для всех профилей и персонажей. Перезагрузите интерфейс, чтобы применить другой язык. Названия предметов и тексты, предоставляемые игрой, остаются на языке клиента."
+    L["Existing profiles"] = "Существующие профили"
+    L["New profile"] = "Новый профиль"
+    L["Copy from profile"] = "Скопировать из профиля"
+    L["Reset profile"] = "Сбросить профиль"
+    L["Delete profile"] = "Удалить профиль"
+    L["Delete profile confirmation"] = "Удалить выбранный профиль?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "koKR")
 if L then
-	--[[Translation missing --]]
-L["(Legacy Types)"] = "(Legacy Types)"
---[[Translation missing --]]
-L["Add item to alert list"] = "Add item to alert list"
---[[Translation missing --]]
-L["Add item to ignore list"] = "Add item to ignore list"
---[[Translation missing --]]
-L["Add item to white list"] = "Add item to white list"
---[[Translation missing --]]
-L["Added"] = "Added"
---[[Translation missing --]]
-L["Alert List"] = "Alert List"
---[[Translation missing --]]
-L["All"] = "All"
---[[Translation missing --]]
-L["All items received between this delay will be grouped"] = "All items received between this delay will be grouped"
---[[Translation missing --]]
-L["Already in the list"] = "Already in the list"
---[[Translation missing --]]
-L["Auto confirm loot roll"] = "Auto confirm loot roll"
---[[Translation missing --]]
-L["Blacklist"] = "Blacklist"
---[[Translation missing --]]
-L["Close"] = "Close"
---[[Translation missing --]]
-L["Close after loot"] = "Close after loot"
---[[Translation missing --]]
-L["Coin"] = "Coin"
---[[Translation missing --]]
-L["Disabled"] = "Disabled"
---[[Translation missing --]]
-L["Don't loot anything while Fishing"] = "Don't loot anything while Fishing"
---[[Translation missing --]]
-L["Enable AutoLooter"] = "Enable AutoLooter"
---[[Translation missing --]]
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter will not loot anything when WoWs AutoLoot option is looting!
-
-This allows you to use the WoWs AutoLoot key as way to enable/disable AutoLooter by target.
-
-You can configure this options in 'Menu > Interface > Controls'.]=]
---[[Translation missing --]]
-L["Enabled"] = "Enabled"
---[[Translation missing --]]
-L["Fast loot"] = "Fast loot"
---[[Translation missing --]]
-L["Fishing"] = "Fishing"
---[[Translation missing --]]
-L["General"] = "General"
---[[Translation missing --]]
-L["Hold and drag to move"] = "Hold and drag to move"
---[[Translation missing --]]
-L["Ignore BoP"] = "Ignore BoP"
---[[Translation missing --]]
-L["Ignore Fishing"] = "Ignore Fishing"
---[[Translation missing --]]
-L["Ignore greys when looting by type"] = "Ignore greys when looting by type"
---[[Translation missing --]]
-L["Ignored"] = "Ignored"
---[[Translation missing --]]
-L["Integration"] = "Integration"
---[[Translation missing --]]
-L["Invalid item"] = "Invalid item"
---[[Translation missing --]]
-L["Items list"] = "Items list"
---[[Translation missing --]]
-L["Left-click"] = "Left-click"
---[[Translation missing --]]
-L["Listed"] = "Listed"
---[[Translation missing --]]
-L["Load Profile"] = "Load Profile"
---[[Translation missing --]]
-L["Load profile '${profile}' and reload UI?"] = "Load profile '${profile}' and reload UI?"
---[[Translation missing --]]
-L["Locked"] = "Locked"
---[[Translation missing --]]
-L["Loot by Price"] = "Loot by Price"
---[[Translation missing --]]
-L["Loot by Rarity"] = "Loot by Rarity"
---[[Translation missing --]]
-L["Loot everything"] = "Loot everything"
---[[Translation missing --]]
-L["Loot everything while Fishing"] = "Loot everything while Fishing"
---[[Translation missing --]]
-L["Loot everything with a price greater or equal to this value"] = "Loot everything with a price greater or equal to this value"
---[[Translation missing --]]
-L["Loot quest items"] = "Loot quest items"
---[[Translation missing --]]
-L["Not listed"] = "Not listed"
---[[Translation missing --]]
-L["Off"] = "Off"
---[[Translation missing --]]
-L["On"] = "On"
---[[Translation missing --]]
-L["Price"] = "Price"
---[[Translation missing --]]
-L["Price (in coppers)"] = "Price (in coppers)"
---[[Translation missing --]]
-L["Print items others receive"] = "Print items others receive"
---[[Translation missing --]]
-L["Print items you receive"] = "Print items you receive"
---[[Translation missing --]]
-L["Printout chat frames"] = "Printout chat frames"
---[[Translation missing --]]
-L["Printout commands at login"] = "Printout commands at login"
---[[Translation missing --]]
-L["Printout items icon only"] = "Printout items icon only"
---[[Translation missing --]]
-L["Printout items ignored"] = "Printout items ignored"
---[[Translation missing --]]
-L["Printout items looted"] = "Printout items looted"
---[[Translation missing --]]
-L["Printout items type"] = "Printout items type"
---[[Translation missing --]]
-L["Printout reason of loot"] = "Printout reason of loot"
---[[Translation missing --]]
-L["Quest"] = "Quest"
---[[Translation missing --]]
-L["Rarity"] = "Rarity"
---[[Translation missing --]]
-L["Received Items"] = "Received Items"
---[[Translation missing --]]
-L["Received items group Delay (ms)"] = "Received items group Delay (ms)"
---[[Translation missing --]]
-L["Remove all"] = "Remove all"
---[[Translation missing --]]
-L["Remove item from alert list"] = "Remove item from alert list"
---[[Translation missing --]]
-L["Remove item from ignore list"] = "Remove item from ignore list"
---[[Translation missing --]]
-L["Remove item from white list"] = "Remove item from white list"
---[[Translation missing --]]
-L["Remove old entries"] = "Remove old entries"
---[[Translation missing --]]
-L["Removed"] = "Removed"
---[[Translation missing --]]
-L["Right-click"] = "Right-click"
---[[Translation missing --]]
-L["Right-click to show profile menu"] = "Right-click to show profile menu"
---[[Translation missing --]]
-L["Select all"] = "Select all"
---[[Translation missing --]]
-L["Set alert sound"] = "Set alert sound"
---[[Translation missing --]]
-L["Show/Hide minimap button"] = "Show/Hide minimap button"
---[[Translation missing --]]
-L["Show/Hide UI"] = "Show/Hide UI"
---[[Translation missing --]]
-L["This can be useful to let addons like Fishing Buddy do its work"] = "This can be useful to let addons like Fishing Buddy do its work"
---[[Translation missing --]]
-L["This will cleanup and recreate the type database"] = "This will cleanup and recreate the type database"
---[[Translation missing --]]
-L["This will remove old types/subtypes entries from the database"] = "This will remove old types/subtypes entries from the database"
---[[Translation missing --]]
-L["to Enable/Disable loot all"] = "to Enable/Disable loot all"
---[[Translation missing --]]
-L["to Show/Hide UI"] = "to Show/Hide UI"
---[[Translation missing --]]
-L["Token"] = "Token"
---[[Translation missing --]]
-L["Try to show loot animation"] = "Try to show loot animation"
---[[Translation missing --]]
-L["Type"] = "Type"
---[[Translation missing --]]
-L["Whitelist"] = "Whitelist"
---[[Translation missing --]]
-L["You"] = "You"
---[[Translation missing --]]
-L["You can drag & drop items here!"] = "You can drag & drop items here!"
-
-	return
+    L["(Legacy Types)"] = "기존 유형"
+    L["Add item to alert list"] = "알림 목록에 아이템 추가"
+    L["Add item to ignore list"] = "차단 목록에 아이템 추가"
+    L["Add item to white list"] = "허용 목록에 아이템 추가"
+    L["Added"] = "추가됨"
+    L["Alert List"] = "알림 목록"
+    L["All"] = "모두"
+    L["All items received between this delay will be grouped"] = "이 시간 안에 받은 모든 아이템을 묶어서 표시합니다"
+    L["Already in the list"] = "이미 목록에 있음"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "가격 확인에 Auctionator 연동 사용"
+    L["Auto confirm loot roll"] = "전리품 주사위 자동 확인"
+    L["Blacklist"] = "차단 목록"
+    L["Close"] = "닫기"
+    L["Close after loot"] = "획득 후 닫기"
+    L["Coin"] = "동전"
+    L["Disabled"] = "비활성화"
+    L["Don't loot anything while Fishing"] = "낚시 중 아무것도 획득하지 않기"
+    L["Loot only whitelisted items while Fishing"] = "낚시 중 허용 목록의 아이템만 획득"
+    L["Fishing whitelist mode description"] = "낚시 중에는 현재 프로필의 허용 목록에 있는 아이템만 획득합니다. 물고기로 표시된 아이템도 포함됩니다. 다른 아이템에는 일반 희귀도, 가격, 유형 및 모두 획득 규칙을 적용하지 않습니다. 목록이 비어 있으면 아무것도 획득하지 않습니다. WoW 자동 전리품 획득과 다른 자동 획득 애드온을 끄세요. 이 모드는 다른 기능의 획득을 막을 수 없습니다."
+    L["Enable AutoLooter"] = "AutoLooter 사용"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "WoW 자동 전리품 획득이 작동할 때는 AutoLooter가 아무것도 획득하지 않습니다.\n\nWoW 자동 전리품 획득 키를 사용하여 대상별로 AutoLooter를 켜거나 끌 수 있습니다.\n\n메뉴 > 인터페이스 > 조작에서 설정할 수 있습니다."
+    L["Enabled"] = "활성화"
+    L["Fast loot"] = "빠른 획득"
+    L["Fishing"] = "낚시"
+    L["Fishes (added in Whitelist)"] = "물고기 (허용 목록에 추가됨)"
+    L["General"] = "일반"
+    L["Profiles"] = "프로필 목록"
+    L["Profile"] = "프로필"
+    L["Other options"] = "기타 설정"
+    L["Settings"] = "설정"
+    L["Add"] = "추가"
+    L["Create"] = "생성"
+    L["Preview"] = "미리 듣기"
+    L["Custom sound"] = "사용자 지정 소리"
+    L["Raid warning"] = "공격대 경보"
+    L["Ready check"] = "전투 준비 확인"
+    L["Boss warning"] = "우두머리 경보"
+    L["Whisper"] = "귓속말"
+    L["Map ping"] = "지도 신호"
+    L["Alarm 1"] = "알람 1"
+    L["Alarm 2"] = "알람 2"
+    L["Alarm 3"] = "알람 3"
+    L["Coins"] = "동전"
+    L["Fishing reel"] = "물고기 입질"
+    L["Clear selection"] = "선택 해제"
+    L["Destinations"] = "출력 대상"
+    L["Messages"] = "메시지"
+    L["Format"] = "표시 형식"
+    L["Fishing mode"] = "낚시 모드"
+    L["Use general filters"] = "일반 필터 사용"
+    L["Profile maintenance"] = "프로필 관리"
+    L["Profile maintenance help"] = "초기화하면 활성 프로필을 기본값으로 되돌립니다. 삭제하면 다른 저장된 프로필을 제거합니다. 두 작업 모두 확인이 필요합니다."
+    L["Reset profile confirmation"] = "활성 프로필을 기본 설정으로 초기화할까요?"
+    L["List add instructions"] = "아이템을 입력란으로 끌어 추가하거나 이름 또는 ID를 입력한 후 추가를 누르세요."
+    L["Loot all status"] = "모두 획득이 활성화되어 있습니다. 가격과 희귀도는 획득을 제한하지 않습니다. 제외 필터는 계속 적용됩니다."
+    L["Alert empty list help"] = "설정된 알림이 없습니다. 위에서 아이템을 추가하면 전리품에 나타날 때 알림을 받습니다."
+    L["Fishing mode help"] = "일반 필터는 평소 전리품 규칙을 사용합니다. 허용 목록 모드는 물고기로 표시된 아이템을 포함하여 목록의 아이템만 획득합니다. AutoLooter가 낚시 전리품을 제어하도록 WoW 자동 전리품 획득과 다른 자동 획득 애드온을 끄세요."
+    L["Item lists"] = "아이템 목록"
+    L["Price slider help"] = "자동 획득에 필요한 아이템의 최소 가치입니다. 10실버 단위로 최대 20골드까지 설정합니다. 0이면 이 필터가 꺼집니다. 다른 활성 필터는 더 저렴한 아이템도 획득할 수 있습니다."
+    L["Auctionator option help"] = "가격 필터에서 Auctionator의 경매장 가격도 확인합니다. 상점 판매 가격이나 알려진 경매장 가격이 기준에 도달하면 획득합니다. 경매장 가격에는 Auctionator가 필요합니다."
+    L["Ignore BoP option help"] = "획득 시 귀속 아이템을 건너뜁니다. 허용 목록의 아이템은 이 필터보다 우선합니다."
+    L["Fishing all option help"] = "앞선 차단 필터가 제외하지 않는 모든 낚시 전리품을 획득합니다. 이 모드를 선택하면 다른 낚시 모드가 꺼집니다."
+    L["Fishing none option help"] = "낚시 중 AutoLooter가 아무것도 획득하지 않습니다. 허용 목록의 아이템도 포함됩니다. Fishing Buddy와 함께 사용하기 좋습니다. WoW 자동 전리품 획득이나 다른 애드온을 막지는 않습니다. 이 모드를 선택하면 다른 낚시 모드가 꺼집니다."
+    L["Whitelist empty list help"] = "표시할 아이템이 없습니다. 위 입력란에 아이템을 끌어 놓거나 이름 또는 ID를 입력하세요. 물고기로 표시된 아이템은 낚시에 나타납니다."
+    L["Blacklist empty list help"] = "제외된 아이템이 없습니다. 위 입력란에 아이템을 끌어 놓거나 이름 또는 ID를 입력하세요."
+    L["Fishing empty list help"] = "추가된 물고기가 없습니다. 허용 목록에 아이템을 추가한 후 옆의 물고기 버튼으로 물고기 표시를 하세요."
+    L["Item category"] = "아이템 분류"
+    L["Advanced options"] = "고급 설정"
+    L["Hold and drag to move"] = "누른 채 끌어서 이동"
+    L["Ignore BoP"] = "획득 시 귀속 아이템 제외"
+    L["Ignore Fishing"] = "낚시 전리품 제외"
+    L["Ignore greys when looting by type"] = "유형별 획득 시 회색 아이템 제외"
+    L["Ignored"] = "제외됨"
+    L["Integration"] = "연동"
+    L["Invalid item"] = "유효하지 않은 아이템"
+    L["Items list"] = "아이템 목록"
+    L["Mark as fish"] = "물고기로 표시"
+    L["Remove fish tag"] = "물고기 표시 해제"
+    L["Left-click"] = "왼쪽 클릭"
+    L["Listed"] = "목록에 있음"
+    L["Load Profile"] = "프로필 불러오기"
+    L["Load profile '${profile}' and reload UI?"] = "'${profile}' 프로필을 불러오고 인터페이스를 다시 불러올까요?"
+    L["Locked"] = "잠김"
+    L["Loot by Price"] = "가격별 획득"
+    L["Loot by Rarity"] = "희귀도별 획득"
+    L["Loot everything"] = "모두 획득"
+    L["Loot everything while Fishing"] = "낚시 중 모두 획득"
+    L["Loot everything with a price greater or equal to this value"] = "이 값 이상의 가격인 모든 아이템 획득"
+    L["Loot quest items"] = "퀘스트 아이템 획득"
+    L["Not listed"] = "목록에 없음"
+    L["Off"] = "꺼짐"
+    L["On"] = "켜짐"
+    L["Price"] = "가격"
+    L["Price (in coppers)"] = "가격 (코퍼)"
+    L["Print items others receive"] = "다른 사람이 받은 아이템 표시"
+    L["Print items you receive"] = "내가 받은 아이템 표시"
+    L["Printout chat frames"] = "메시지를 표시할 대화창"
+    L["Printout commands at login"] = "접속 시 명령어 표시"
+    L["Printout items icon only"] = "아이템 아이콘만 표시"
+    L["Printout items ignored"] = "제외한 아이템 표시"
+    L["Printout items looted"] = "획득한 아이템 표시"
+    L["Printout items type"] = "아이템 유형 표시"
+    L["Printout reason of loot"] = "획득 이유 표시"
+    L["Quest"] = "퀘스트"
+    L["Rarity"] = "희귀도"
+    L["Received Items"] = "받은 아이템"
+    L["Received items group Delay (ms)"] = "받은 아이템 묶음 표시 지연 (ms)"
+    L["Remove all"] = "모두 제거"
+    L["Remove item from alert list"] = "알림 목록에서 아이템 제거"
+    L["Remove item from ignore list"] = "차단 목록에서 아이템 제거"
+    L["Remove item from white list"] = "허용 목록에서 아이템 제거"
+    L["Remove old entries"] = "오래된 항목 제거"
+    L["Removed"] = "제거됨"
+    L["Right-click"] = "오른쪽 클릭"
+    L["Right-click to show profile menu"] = "오른쪽 클릭으로 프로필 메뉴 표시"
+    L["Select all"] = "모두 선택"
+    L["Set alert sound"] = "알림 소리 선택"
+    L["Show/Hide minimap button"] = "미니맵 버튼 표시/숨기기"
+    L["Show/Hide UI"] = "인터페이스 표시/숨기기"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "Fishing Buddy 같은 애드온이 작동하도록 할 때 유용합니다"
+    L["This will cleanup and recreate the type database"] = "유형 데이터베이스를 정리하고 다시 만듭니다"
+    L["This will remove old types/subtypes entries from the database"] = "데이터베이스에서 오래된 유형 및 하위 유형 항목을 제거합니다"
+    L["to Enable/Disable loot all"] = "모두 획득 켜기/끄기"
+    L["to Show/Hide UI"] = "인터페이스 표시/숨기기"
+    L["Token"] = "토큰"
+    L["Try to show loot animation"] = "전리품 획득 애니메이션 표시 시도"
+    L["Type"] = "유형"
+    L["Whitelist"] = "허용 목록"
+    L["You"] = "나"
+    L["You can drag & drop items here!"] = "여기에 아이템을 끌어 놓으세요!"
+    L["Chat"] = "대화"
+    L["Old Entries"] = "오래된 항목"
+    L["[link/id/name] or [mouse over]"] = "[링크/ID/이름] 또는 [커서 아래]"
+    L["Addon Language"] = "애드온 언어"
+    L["Client Language"] = "클라이언트 언어"
+    L["Apply language and reload UI"] = "언어 적용 및 인터페이스 재시작"
+    L["Addon language help"] = "AutoLooter의 언어를 선택하세요. 모든 프로필과 캐릭터가 이 설정을 공유합니다. 다른 언어를 적용하려면 인터페이스를 다시 불러오세요. 아이템 이름과 게임에서 제공하는 텍스트는 클라이언트 언어를 사용합니다."
+    L["Existing profiles"] = "기존 프로필"
+    L["New profile"] = "새 프로필"
+    L["Copy from profile"] = "프로필에서 복사"
+    L["Reset profile"] = "프로필 초기화"
+    L["Delete profile"] = "프로필 삭제"
+    L["Delete profile confirmation"] = "선택한 프로필을 삭제할까요?"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "zhCN")
 if L then
-	L["(Legacy Types)"] = "(战利品类型)"
-L["Add item to alert list"] = "添加物品到警告列表"
-L["Add item to ignore list"] = "添加物品到忽略列表"
-L["Add item to white list"] = "添加物品到白名单"
-L["Added"] = "已添加"
-L["Alert List"] = "警告列表"
-L["All"] = "所有"
---[[Translation missing --]]
-L["All items received between this delay will be grouped"] = "All items received between this delay will be grouped"
-L["Already in the list"] = "已经在列表中"
-L["Auto confirm loot roll"] = "自动确认拾取骰点"
-L["Blacklist"] = "黑名单"
-L["Close"] = "关闭窗口"
-L["Close after loot"] = "拾取后关闭窗口"
-L["Coin"] = "钱币"
-L["Disabled"] = "已禁用"
---[[Translation missing --]]
-L["Don't loot anything while Fishing"] = "Don't loot anything while Fishing"
-L["Enable AutoLooter"] = "启用AutoLooter"
---[[Translation missing --]]
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter will not loot anything when WoWs AutoLoot option is looting!
-
-This allows you to use the WoWs AutoLoot key as way to enable/disable AutoLooter by target.
-
-You can configure this options in 'Menu > Interface > Controls'.]=]
-L["Enabled"] = "已启用"
---[[Translation missing --]]
-L["Fast loot"] = "Fast loot"
---[[Translation missing --]]
-L["Fishing"] = "Fishing"
-L["General"] = "通用"
-L["Hold and drag to move"] = "按住并拖动移动"
-L["Ignore BoP"] = "忽略装备后绑定"
---[[Translation missing --]]
-L["Ignore Fishing"] = "Ignore Fishing"
-L["Ignore greys when looting by type"] = "当按类型拾取时忽略灰色物品"
-L["Ignored"] = "忽略的"
---[[Translation missing --]]
-L["Integration"] = "Integration"
-L["Invalid item"] = "无效的物品"
-L["Items list"] = "物品列表"
-L["Left-click"] = "点击鼠标左键"
-L["Listed"] = "列出的"
---[[Translation missing --]]
-L["Load Profile"] = "Load Profile"
---[[Translation missing --]]
-L["Load profile '${profile}' and reload UI?"] = "Load profile '${profile}' and reload UI?"
-L["Locked"] = "锁定的"
-L["Loot by Price"] = "按价格拾取"
-L["Loot by Rarity"] = "按稀有度拾取"
-L["Loot everything"] = "拾取所有物品"
---[[Translation missing --]]
-L["Loot everything while Fishing"] = "Loot everything while Fishing"
---[[Translation missing --]]
-L["Loot everything with a price greater or equal to this value"] = "Loot everything with a price greater or equal to this value"
-L["Loot quest items"] = "拾取任务物品"
-L["Not listed"] = "未列出的"
-L["Off"] = "关"
-L["On"] = "开"
-L["Price"] = "价格"
-L["Price (in coppers)"] = "价格 (铜币)"
---[[Translation missing --]]
-L["Print items others receive"] = "Print items others receive"
---[[Translation missing --]]
-L["Print items you receive"] = "Print items you receive"
---[[Translation missing --]]
-L["Printout chat frames"] = "Printout chat frames"
---[[Translation missing --]]
-L["Printout commands at login"] = "Printout commands at login"
-L["Printout items icon only"] = "聊天栏只显示物品图标"
-L["Printout items ignored"] = "聊天栏显示忽略的物品"
-L["Printout items looted"] = "聊天栏显示已拾取物品"
-L["Printout items type"] = "聊天栏显示物品类型"
-L["Printout reason of loot"] = "聊天栏显示拾取原因"
-L["Quest"] = "任务"
-L["Rarity"] = "稀有度"
---[[Translation missing --]]
-L["Received Items"] = "Received Items"
---[[Translation missing --]]
-L["Received items group Delay (ms)"] = "Received items group Delay (ms)"
-L["Remove all"] = "删除所有"
-L["Remove item from alert list"] = "从警告列表中删除物品"
-L["Remove item from ignore list"] = "从忽略列表中删除物品"
-L["Remove item from white list"] = "从白名单中删除物品"
---[[Translation missing --]]
-L["Remove old entries"] = "Remove old entries"
-L["Removed"] = "已删除"
-L["Right-click"] = "点击鼠标右键"
---[[Translation missing --]]
-L["Right-click to show profile menu"] = "Right-click to show profile menu"
-L["Select all"] = "全选"
-L["Set alert sound"] = "设置警告声音"
-L["Show/Hide minimap button"] = "显示或隐藏小地图按钮"
-L["Show/Hide UI"] = "显示或隐藏界面"
---[[Translation missing --]]
-L["This can be useful to let addons like Fishing Buddy do its work"] = "This can be useful to let addons like Fishing Buddy do its work"
---[[Translation missing --]]
-L["This will cleanup and recreate the type database"] = "This will cleanup and recreate the type database"
---[[Translation missing --]]
-L["This will remove old types/subtypes entries from the database"] = "This will remove old types/subtypes entries from the database"
-L["to Enable/Disable loot all"] = "启用或禁用拾取所有物品"
-L["to Show/Hide UI"] = "显示或隐藏界面"
-L["Token"] = "货币"
---[[Translation missing --]]
-L["Try to show loot animation"] = "Try to show loot animation"
-L["Type"] = "类型"
-L["Whitelist"] = "Whitelist"
---[[Translation missing --]]
-L["You"] = "You"
-L["You can drag & drop items here!"] = "你可以在这里拖放物品!"
-
-	return
+    L["(Legacy Types)"] = "（旧版类型）"
+    L["Add item to alert list"] = "添加物品到警报列表"
+    L["Add item to ignore list"] = "添加物品到排除列表"
+    L["Add item to white list"] = "添加物品到允许列表"
+    L["Added"] = "已添加"
+    L["Alert List"] = "警报列表"
+    L["All"] = "全部"
+    L["All items received between this delay will be grouped"] = "在此延迟时间内收到的所有物品会合并显示"
+    L["Already in the list"] = "已在列表中"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "启用 Auctionator 整合以检查价格"
+    L["Auto confirm loot roll"] = "自动确认战利品掷骰"
+    L["Blacklist"] = "排除列表"
+    L["Close"] = "关闭"
+    L["Close after loot"] = "拾取后关闭"
+    L["Coin"] = "钱币"
+    L["Disabled"] = "已禁用"
+    L["Don't loot anything while Fishing"] = "钓鱼时不拾取任何物品"
+    L["Loot only whitelisted items while Fishing"] = "钓鱼时仅拾取允许列表中的物品"
+    L["Fishing whitelist mode description"] = "钓鱼时仅拾取当前配置的允许列表中的物品，包括标记为鱼的物品。其他物品不使用通用的品质、价格、类型和全部拾取规则。列表为空时不拾取任何物品。请关闭 WoW 自动拾取及其他自动拾取插件；此模式无法阻止它们拾取物品。"
+    L["Enable AutoLooter"] = "启用 AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "WoW 自动拾取正在拾取时，AutoLooter 不会拾取任何物品。\n\n这样可以使用 WoW 自动拾取按键，针对当前目标启用或禁用 AutoLooter。\n\n可在“菜单 > 界面 > 控制”中设置这些选项。"
+    L["Enabled"] = "已启用"
+    L["Fast loot"] = "快速拾取"
+    L["Fishing"] = "钓鱼"
+    L["Fishes (added in Whitelist)"] = "鱼类（已添加到允许列表）"
+    L["General"] = "常规"
+    L["Profiles"] = "配置列表"
+    L["Profile"] = "配置"
+    L["Other options"] = "其他选项"
+    L["Settings"] = "设置"
+    L["Add"] = "添加"
+    L["Create"] = "创建"
+    L["Preview"] = "试听"
+    L["Custom sound"] = "自定义声音"
+    L["Raid warning"] = "团队警报"
+    L["Ready check"] = "就绪确认"
+    L["Boss warning"] = "首领警报"
+    L["Whisper"] = "悄悄话"
+    L["Map ping"] = "地图信号"
+    L["Alarm 1"] = "闹钟 1"
+    L["Alarm 2"] = "闹钟 2"
+    L["Alarm 3"] = "闹钟 3"
+    L["Coins"] = "钱币"
+    L["Fishing reel"] = "鱼上钩"
+    L["Clear selection"] = "清除选择"
+    L["Destinations"] = "输出位置"
+    L["Messages"] = "消息"
+    L["Format"] = "显示格式"
+    L["Fishing mode"] = "钓鱼模式"
+    L["Use general filters"] = "使用通用过滤规则"
+    L["Profile maintenance"] = "配置管理"
+    L["Profile maintenance help"] = "重置会恢复当前配置的默认设置。删除会移除另一个已保存的配置。两种操作都需要确认。"
+    L["Reset profile confirmation"] = "将当前配置重置为默认设置？"
+    L["List add instructions"] = "将物品拖入输入框以添加，或输入名称或 ID 后点击添加。"
+    L["Loot all status"] = "全部拾取已启用：价格和品质不限制拾取。排除过滤规则仍然有效。"
+    L["Alert empty list help"] = "尚未设置警报。在上方添加物品后，当它出现在战利品中时会收到提示。"
+    L["Fishing mode help"] = "通用过滤规则使用平时的拾取规则。允许列表模式仅拾取列表中的物品，包括标记为鱼的物品。请关闭 WoW 自动拾取及其他自动拾取插件，让 AutoLooter 控制钓鱼拾取。"
+    L["Item lists"] = "物品列表"
+    L["Price slider help"] = "自动拾取所需的最低物品价值。每档 10 银币，最高 20 金币。设为 0 时禁用此过滤规则。其他已启用的规则仍可能拾取更便宜的物品。"
+    L["Auctionator option help"] = "价格过滤规则也会检查 Auctionator 提供的拍卖价格。当物品的商店售价或已知拍卖价格达到阈值时拾取。拍卖价格需要 Auctionator。"
+    L["Ignore BoP option help"] = "跳过拾取后绑定的物品。允许列表中的物品优先于此过滤规则。"
+    L["Fishing all option help"] = "拾取所有钓鱼战利品，除非被前面的阻止规则排除。选择此模式会关闭其他钓鱼模式。"
+    L["Fishing none option help"] = "AutoLooter 在钓鱼时不拾取任何物品，包括允许列表中的物品。适合配合 Fishing Buddy 使用。此功能不会阻止 WoW 自动拾取或其他插件。选择此模式会关闭其他钓鱼模式。"
+    L["Whitelist empty list help"] = "没有可显示的物品。将物品拖入上方输入框，或输入名称或 ID。标记为鱼的物品显示在钓鱼中。"
+    L["Blacklist empty list help"] = "没有被排除的物品。将物品拖入上方输入框，或输入名称或 ID。"
+    L["Fishing empty list help"] = "尚未添加鱼类。在允许列表中添加物品，然后点击旁边的鱼形按钮将其标记为鱼。"
+    L["Item category"] = "物品分类"
+    L["Advanced options"] = "高级选项"
+    L["Hold and drag to move"] = "按住并拖动以移动"
+    L["Ignore BoP"] = "忽略拾取后绑定物品"
+    L["Ignore Fishing"] = "忽略钓鱼拾取"
+    L["Ignore greys when looting by type"] = "按类型拾取时忽略灰色物品"
+    L["Ignored"] = "已忽略"
+    L["Integration"] = "整合"
+    L["Invalid item"] = "无效物品"
+    L["Items list"] = "物品列表"
+    L["Mark as fish"] = "标记为鱼"
+    L["Remove fish tag"] = "移除鱼类标记"
+    L["Left-click"] = "左键点击"
+    L["Listed"] = "已列入"
+    L["Load Profile"] = "加载配置"
+    L["Load profile '${profile}' and reload UI?"] = "加载配置“${profile}”并重新加载界面？"
+    L["Locked"] = "已锁定"
+    L["Loot by Price"] = "按价格拾取"
+    L["Loot by Rarity"] = "按品质拾取"
+    L["Loot everything"] = "拾取全部"
+    L["Loot everything while Fishing"] = "钓鱼时拾取全部"
+    L["Loot everything with a price greater or equal to this value"] = "拾取价格大于或等于此值的所有物品"
+    L["Loot quest items"] = "拾取任务物品"
+    L["Not listed"] = "未列入"
+    L["Off"] = "关"
+    L["On"] = "开"
+    L["Price"] = "价格"
+    L["Price (in coppers)"] = "价格（铜币）"
+    L["Print items others receive"] = "显示其他人获得的物品"
+    L["Print items you receive"] = "显示你获得的物品"
+    L["Printout chat frames"] = "消息输出聊天窗口"
+    L["Printout commands at login"] = "登录时显示命令"
+    L["Printout items icon only"] = "仅显示物品图标"
+    L["Printout items ignored"] = "显示被忽略的物品"
+    L["Printout items looted"] = "显示已拾取的物品"
+    L["Printout items type"] = "显示物品类型"
+    L["Printout reason of loot"] = "显示拾取原因"
+    L["Quest"] = "任务"
+    L["Rarity"] = "品质"
+    L["Received Items"] = "获得的物品"
+    L["Received items group Delay (ms)"] = "获得物品的合并延迟（毫秒）"
+    L["Remove all"] = "全部移除"
+    L["Remove item from alert list"] = "从警报列表移除物品"
+    L["Remove item from ignore list"] = "从排除列表移除物品"
+    L["Remove item from white list"] = "从允许列表移除物品"
+    L["Remove old entries"] = "移除旧条目"
+    L["Removed"] = "已移除"
+    L["Right-click"] = "右键点击"
+    L["Right-click to show profile menu"] = "右键点击显示配置菜单"
+    L["Select all"] = "全部选择"
+    L["Set alert sound"] = "选择警报声音"
+    L["Show/Hide minimap button"] = "显示/隐藏小地图按钮"
+    L["Show/Hide UI"] = "显示/隐藏界面"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "可让 Fishing Buddy 等插件正常工作"
+    L["This will cleanup and recreate the type database"] = "将清理并重建类型数据库"
+    L["This will remove old types/subtypes entries from the database"] = "将从数据库中移除旧的类型及子类型条目"
+    L["to Enable/Disable loot all"] = "以启用/禁用全部拾取"
+    L["to Show/Hide UI"] = "以显示/隐藏界面"
+    L["Token"] = "代币"
+    L["Try to show loot animation"] = "尝试显示拾取动画"
+    L["Type"] = "类型"
+    L["Whitelist"] = "允许列表"
+    L["You"] = "你"
+    L["You can drag & drop items here!"] = "可以将物品拖放到这里！"
+    L["Chat"] = "聊天"
+    L["Old Entries"] = "旧条目"
+    L["[link/id/name] or [mouse over]"] = "[链接/ID/名称] 或 [鼠标指向]"
+    L["Addon Language"] = "插件语言"
+    L["Client Language"] = "客户端语言"
+    L["Apply language and reload UI"] = "应用语言并重载界面"
+    L["Addon language help"] = "选择 AutoLooter 的语言。所有配置和角色共用此设置。重载界面以应用其他语言。物品名称及游戏提供的文本仍使用客户端语言。"
+    L["Existing profiles"] = "现有配置"
+    L["New profile"] = "新建配置"
+    L["Copy from profile"] = "从配置复制"
+    L["Reset profile"] = "重置配置"
+    L["Delete profile"] = "删除配置"
+    L["Delete profile confirmation"] = "删除所选配置？"
 end
 
 L = AceLocale:NewLocale("AutoLooter", "zhTW")
 if L then
-	--[[Translation missing --]]
-L["(Legacy Types)"] = "(Legacy Types)"
---[[Translation missing --]]
-L["Add item to alert list"] = "Add item to alert list"
---[[Translation missing --]]
-L["Add item to ignore list"] = "Add item to ignore list"
---[[Translation missing --]]
-L["Add item to white list"] = "Add item to white list"
---[[Translation missing --]]
-L["Added"] = "Added"
---[[Translation missing --]]
-L["Alert List"] = "Alert List"
---[[Translation missing --]]
-L["All"] = "All"
---[[Translation missing --]]
-L["All items received between this delay will be grouped"] = "All items received between this delay will be grouped"
---[[Translation missing --]]
-L["Already in the list"] = "Already in the list"
---[[Translation missing --]]
-L["Auto confirm loot roll"] = "Auto confirm loot roll"
---[[Translation missing --]]
-L["Blacklist"] = "Blacklist"
---[[Translation missing --]]
-L["Close"] = "Close"
---[[Translation missing --]]
-L["Close after loot"] = "Close after loot"
---[[Translation missing --]]
-L["Coin"] = "Coin"
---[[Translation missing --]]
-L["Disabled"] = "Disabled"
---[[Translation missing --]]
-L["Don't loot anything while Fishing"] = "Don't loot anything while Fishing"
---[[Translation missing --]]
-L["Enable AutoLooter"] = "Enable AutoLooter"
---[[Translation missing --]]
-L["ENABLE_AUTO_LOOTER_DESC"] = [=[AutoLooter will not loot anything when WoWs AutoLoot option is looting!
-
-This allows you to use the WoWs AutoLoot key as way to enable/disable AutoLooter by target.
-
-You can configure this options in 'Menu > Interface > Controls'.]=]
---[[Translation missing --]]
-L["Enabled"] = "Enabled"
---[[Translation missing --]]
-L["Fast loot"] = "Fast loot"
---[[Translation missing --]]
-L["Fishing"] = "Fishing"
---[[Translation missing --]]
-L["General"] = "General"
---[[Translation missing --]]
-L["Hold and drag to move"] = "Hold and drag to move"
---[[Translation missing --]]
-L["Ignore BoP"] = "Ignore BoP"
---[[Translation missing --]]
-L["Ignore Fishing"] = "Ignore Fishing"
---[[Translation missing --]]
-L["Ignore greys when looting by type"] = "Ignore greys when looting by type"
---[[Translation missing --]]
-L["Ignored"] = "Ignored"
---[[Translation missing --]]
-L["Integration"] = "Integration"
---[[Translation missing --]]
-L["Invalid item"] = "Invalid item"
---[[Translation missing --]]
-L["Items list"] = "Items list"
---[[Translation missing --]]
-L["Left-click"] = "Left-click"
---[[Translation missing --]]
-L["Listed"] = "Listed"
---[[Translation missing --]]
-L["Load Profile"] = "Load Profile"
---[[Translation missing --]]
-L["Load profile '${profile}' and reload UI?"] = "Load profile '${profile}' and reload UI?"
---[[Translation missing --]]
-L["Locked"] = "Locked"
---[[Translation missing --]]
-L["Loot by Price"] = "Loot by Price"
---[[Translation missing --]]
-L["Loot by Rarity"] = "Loot by Rarity"
---[[Translation missing --]]
-L["Loot everything"] = "Loot everything"
---[[Translation missing --]]
-L["Loot everything while Fishing"] = "Loot everything while Fishing"
---[[Translation missing --]]
-L["Loot everything with a price greater or equal to this value"] = "Loot everything with a price greater or equal to this value"
---[[Translation missing --]]
-L["Loot quest items"] = "Loot quest items"
---[[Translation missing --]]
-L["Not listed"] = "Not listed"
---[[Translation missing --]]
-L["Off"] = "Off"
---[[Translation missing --]]
-L["On"] = "On"
---[[Translation missing --]]
-L["Price"] = "Price"
---[[Translation missing --]]
-L["Price (in coppers)"] = "Price (in coppers)"
---[[Translation missing --]]
-L["Print items others receive"] = "Print items others receive"
---[[Translation missing --]]
-L["Print items you receive"] = "Print items you receive"
---[[Translation missing --]]
-L["Printout chat frames"] = "Printout chat frames"
---[[Translation missing --]]
-L["Printout commands at login"] = "Printout commands at login"
---[[Translation missing --]]
-L["Printout items icon only"] = "Printout items icon only"
---[[Translation missing --]]
-L["Printout items ignored"] = "Printout items ignored"
---[[Translation missing --]]
-L["Printout items looted"] = "Printout items looted"
---[[Translation missing --]]
-L["Printout items type"] = "Printout items type"
---[[Translation missing --]]
-L["Printout reason of loot"] = "Printout reason of loot"
---[[Translation missing --]]
-L["Quest"] = "Quest"
---[[Translation missing --]]
-L["Rarity"] = "Rarity"
---[[Translation missing --]]
-L["Received Items"] = "Received Items"
---[[Translation missing --]]
-L["Received items group Delay (ms)"] = "Received items group Delay (ms)"
---[[Translation missing --]]
-L["Remove all"] = "Remove all"
---[[Translation missing --]]
-L["Remove item from alert list"] = "Remove item from alert list"
---[[Translation missing --]]
-L["Remove item from ignore list"] = "Remove item from ignore list"
---[[Translation missing --]]
-L["Remove item from white list"] = "Remove item from white list"
---[[Translation missing --]]
-L["Remove old entries"] = "Remove old entries"
---[[Translation missing --]]
-L["Removed"] = "Removed"
---[[Translation missing --]]
-L["Right-click"] = "Right-click"
---[[Translation missing --]]
-L["Right-click to show profile menu"] = "Right-click to show profile menu"
---[[Translation missing --]]
-L["Select all"] = "Select all"
---[[Translation missing --]]
-L["Set alert sound"] = "Set alert sound"
---[[Translation missing --]]
-L["Show/Hide minimap button"] = "Show/Hide minimap button"
---[[Translation missing --]]
-L["Show/Hide UI"] = "Show/Hide UI"
---[[Translation missing --]]
-L["This can be useful to let addons like Fishing Buddy do its work"] = "This can be useful to let addons like Fishing Buddy do its work"
---[[Translation missing --]]
-L["This will cleanup and recreate the type database"] = "This will cleanup and recreate the type database"
---[[Translation missing --]]
-L["This will remove old types/subtypes entries from the database"] = "This will remove old types/subtypes entries from the database"
---[[Translation missing --]]
-L["to Enable/Disable loot all"] = "to Enable/Disable loot all"
---[[Translation missing --]]
-L["to Show/Hide UI"] = "to Show/Hide UI"
-L["Token"] = "代幣"
---[[Translation missing --]]
-L["Try to show loot animation"] = "Try to show loot animation"
---[[Translation missing --]]
-L["Type"] = "Type"
---[[Translation missing --]]
-L["Whitelist"] = "Whitelist"
---[[Translation missing --]]
-L["You"] = "You"
---[[Translation missing --]]
-L["You can drag & drop items here!"] = "You can drag & drop items here!"
-
-	return
+    L["(Legacy Types)"] = "（舊版類型）"
+    L["Add item to alert list"] = "新增物品至警告清單"
+    L["Add item to ignore list"] = "新增物品至排除清單"
+    L["Add item to white list"] = "新增物品至允許清單"
+    L["Added"] = "已新增"
+    L["Alert List"] = "警告清單"
+    L["All"] = "全部"
+    L["All items received between this delay will be grouped"] = "在此延遲時間內收到的所有物品會合併顯示"
+    L["Already in the list"] = "已在清單中"
+    L["Auctionator"] = "Auctionator"
+    L["Enable Auctionator integration for price checking"] = "啟用 Auctionator 整合以檢查價格"
+    L["Auto confirm loot roll"] = "自動確認戰利品擲骰"
+    L["Blacklist"] = "排除清單"
+    L["Close"] = "關閉"
+    L["Close after loot"] = "拾取後關閉"
+    L["Coin"] = "錢幣"
+    L["Disabled"] = "已停用"
+    L["Don't loot anything while Fishing"] = "釣魚時不拾取任何物品"
+    L["Loot only whitelisted items while Fishing"] = "釣魚時僅拾取允許清單中的物品"
+    L["Fishing whitelist mode description"] = "釣魚時僅拾取目前設定檔的允許清單中的物品，包括標記為魚的物品。其他物品不使用一般的品質、價格、類型和全部拾取規則。清單為空時不拾取任何物品。請關閉 WoW 自動拾取及其他自動拾取插件；此模式無法阻止它們拾取物品。"
+    L["Enable AutoLooter"] = "啟用 AutoLooter"
+    L["ENABLE_AUTO_LOOTER_DESC"] = "WoW 自動拾取正在拾取時，AutoLooter 不會拾取任何物品。\n\n因此可以使用 WoW 自動拾取按鍵，針對目前目標啟用或停用 AutoLooter。\n\n可在「選單 > 介面 > 控制」中設定這些選項。"
+    L["Enabled"] = "已啟用"
+    L["Fast loot"] = "快速拾取"
+    L["Fishing"] = "釣魚"
+    L["Fishes (added in Whitelist)"] = "魚類（已加入允許清單）"
+    L["General"] = "一般"
+    L["Profiles"] = "設定檔清單"
+    L["Profile"] = "設定檔"
+    L["Other options"] = "其他選項"
+    L["Settings"] = "設定"
+    L["Add"] = "新增"
+    L["Create"] = "建立"
+    L["Preview"] = "試聽"
+    L["Custom sound"] = "自訂音效"
+    L["Raid warning"] = "團隊警告"
+    L["Ready check"] = "就緒確認"
+    L["Boss warning"] = "首領警告"
+    L["Whisper"] = "悄悄話"
+    L["Map ping"] = "地圖信號"
+    L["Alarm 1"] = "鬧鐘 1"
+    L["Alarm 2"] = "鬧鐘 2"
+    L["Alarm 3"] = "鬧鐘 3"
+    L["Coins"] = "錢幣"
+    L["Fishing reel"] = "魚上鉤"
+    L["Clear selection"] = "清除選取"
+    L["Destinations"] = "輸出位置"
+    L["Messages"] = "訊息"
+    L["Format"] = "顯示格式"
+    L["Fishing mode"] = "釣魚模式"
+    L["Use general filters"] = "使用一般過濾規則"
+    L["Profile maintenance"] = "設定檔管理"
+    L["Profile maintenance help"] = "重設會恢復目前設定檔的預設值。刪除會移除另一個已儲存的設定檔。兩種操作都需要確認。"
+    L["Reset profile confirmation"] = "將目前設定檔重設為預設值？"
+    L["List add instructions"] = "將物品拖曳至輸入框以新增，或輸入名稱或 ID 後點擊新增。"
+    L["Loot all status"] = "全部拾取已啟用：價格和品質不限制拾取。排除過濾規則仍然有效。"
+    L["Alert empty list help"] = "尚未設定警告。在上方新增物品後，當它出現在戰利品中時會收到提示。"
+    L["Fishing mode help"] = "一般過濾規則使用平常的拾取規則。允許清單模式僅拾取清單中的物品，包括標記為魚的物品。請關閉 WoW 自動拾取及其他自動拾取插件，讓 AutoLooter 控制釣魚拾取。"
+    L["Item lists"] = "物品清單"
+    L["Price slider help"] = "自動拾取所需的最低物品價值。每格 10 銀幣，最高 20 金幣。設為 0 時停用此過濾規則。其他已啟用的規則仍可能拾取更便宜的物品。"
+    L["Auctionator option help"] = "價格過濾規則也會檢查 Auctionator 提供的拍賣價格。當物品的商店售價或已知拍賣價格達到門檻時拾取。拍賣價格需要 Auctionator。"
+    L["Ignore BoP option help"] = "略過拾取後綁定的物品。允許清單中的物品優先於此過濾規則。"
+    L["Fishing all option help"] = "拾取所有釣魚戰利品，除非被前面的阻擋規則排除。選擇此模式會關閉其他釣魚模式。"
+    L["Fishing none option help"] = "AutoLooter 在釣魚時不拾取任何物品，包括允許清單中的物品。適合搭配 Fishing Buddy 使用。此功能不會阻止 WoW 自動拾取或其他插件。選擇此模式會關閉其他釣魚模式。"
+    L["Whitelist empty list help"] = "沒有可顯示的物品。將物品拖曳至上方輸入框，或輸入名稱或 ID。標記為魚的物品顯示在釣魚中。"
+    L["Blacklist empty list help"] = "沒有被排除的物品。將物品拖曳至上方輸入框，或輸入名稱或 ID。"
+    L["Fishing empty list help"] = "尚未新增魚類。在允許清單中新增物品，然後點擊旁邊的魚形按鈕將其標記為魚。"
+    L["Item category"] = "物品分類"
+    L["Advanced options"] = "進階選項"
+    L["Hold and drag to move"] = "按住並拖曳以移動"
+    L["Ignore BoP"] = "忽略拾取後綁定物品"
+    L["Ignore Fishing"] = "忽略釣魚拾取"
+    L["Ignore greys when looting by type"] = "依類型拾取時忽略灰色物品"
+    L["Ignored"] = "已忽略"
+    L["Integration"] = "整合"
+    L["Invalid item"] = "無效物品"
+    L["Items list"] = "物品清單"
+    L["Mark as fish"] = "標記為魚"
+    L["Remove fish tag"] = "移除魚類標記"
+    L["Left-click"] = "左鍵點擊"
+    L["Listed"] = "已列入"
+    L["Load Profile"] = "載入設定檔"
+    L["Load profile '${profile}' and reload UI?"] = "載入設定檔「${profile}」並重新載入介面？"
+    L["Locked"] = "已鎖定"
+    L["Loot by Price"] = "依價格拾取"
+    L["Loot by Rarity"] = "依品質拾取"
+    L["Loot everything"] = "拾取全部"
+    L["Loot everything while Fishing"] = "釣魚時拾取全部"
+    L["Loot everything with a price greater or equal to this value"] = "拾取價格大於或等於此值的所有物品"
+    L["Loot quest items"] = "拾取任務物品"
+    L["Not listed"] = "未列入"
+    L["Off"] = "關"
+    L["On"] = "開"
+    L["Price"] = "價格"
+    L["Price (in coppers)"] = "價格（銅幣）"
+    L["Print items others receive"] = "顯示其他人獲得的物品"
+    L["Print items you receive"] = "顯示你獲得的物品"
+    L["Printout chat frames"] = "訊息輸出聊天視窗"
+    L["Printout commands at login"] = "登入時顯示指令"
+    L["Printout items icon only"] = "僅顯示物品圖示"
+    L["Printout items ignored"] = "顯示被忽略的物品"
+    L["Printout items looted"] = "顯示已拾取的物品"
+    L["Printout items type"] = "顯示物品類型"
+    L["Printout reason of loot"] = "顯示拾取原因"
+    L["Quest"] = "任務"
+    L["Rarity"] = "品質"
+    L["Received Items"] = "獲得的物品"
+    L["Received items group Delay (ms)"] = "獲得物品的合併延遲（毫秒）"
+    L["Remove all"] = "全部移除"
+    L["Remove item from alert list"] = "從警告清單移除物品"
+    L["Remove item from ignore list"] = "從排除清單移除物品"
+    L["Remove item from white list"] = "從允許清單移除物品"
+    L["Remove old entries"] = "移除舊項目"
+    L["Removed"] = "已移除"
+    L["Right-click"] = "右鍵點擊"
+    L["Right-click to show profile menu"] = "右鍵點擊顯示設定檔選單"
+    L["Select all"] = "全部選取"
+    L["Set alert sound"] = "選擇警告音效"
+    L["Show/Hide minimap button"] = "顯示/隱藏小地圖按鈕"
+    L["Show/Hide UI"] = "顯示/隱藏介面"
+    L["This can be useful to let addons like Fishing Buddy do its work"] = "可讓 Fishing Buddy 等插件正常運作"
+    L["This will cleanup and recreate the type database"] = "將清理並重建類型資料庫"
+    L["This will remove old types/subtypes entries from the database"] = "將從資料庫中移除舊的類型及子類型項目"
+    L["to Enable/Disable loot all"] = "以啟用/停用全部拾取"
+    L["to Show/Hide UI"] = "以顯示/隱藏介面"
+    L["Token"] = "代幣"
+    L["Try to show loot animation"] = "嘗試顯示拾取動畫"
+    L["Type"] = "類型"
+    L["Whitelist"] = "允許清單"
+    L["You"] = "你"
+    L["You can drag & drop items here!"] = "可以將物品拖放到這裡！"
+    L["Chat"] = "聊天"
+    L["Old Entries"] = "舊項目"
+    L["[link/id/name] or [mouse over]"] = "[連結/ID/名稱] 或 [滑鼠指向]"
+    L["Addon Language"] = "插件語言"
+    L["Client Language"] = "用戶端語言"
+    L["Apply language and reload UI"] = "套用語言並重載介面"
+    L["Addon language help"] = "選擇 AutoLooter 的語言。所有設定檔和角色共用此設定。重載介面以套用其他語言。物品名稱及遊戲提供的文字仍使用用戶端語言。"
+    L["Existing profiles"] = "現有設定檔"
+    L["New profile"] = "新增設定檔"
+    L["Copy from profile"] = "從設定檔複製"
+    L["Reset profile"] = "重設設定檔"
+    L["Delete profile"] = "刪除設定檔"
+    L["Delete profile confirmation"] = "刪除所選設定檔？"
 end
+
+-- Establish client-language text for modules loaded before the database is ready.
+Localization:Apply("client")
